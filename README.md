@@ -55,9 +55,13 @@ make ps
 
 ### 🔧 **Development**
 - [Developer Commands](#developer-commands)
+- [Complete Command Reference](#complete-command-reference)
+- [Database Operations](#database-operations)
 - [API Documentation](#api-documentation)
 - [Testing Guide](#testing-guide)
 - [Debugging & Monitoring](#debugging--monitoring)
+- [Advanced Operations](#advanced-operations)
+- [Performance Monitoring](#performance-monitoring)
 
 ### 📖 **Reference**
 - [Compliance Matrix](#compliance-matrix)
@@ -157,7 +161,450 @@ make ps
 # - notification-worker: running
 ```
 
-## Compliance Matrix
+---
+
+## 🔧 Developer Commands
+
+### **Essential Makefile Commands**
+
+#### **Container Management**
+```bash
+# Build all Docker images
+make build
+# Equivalent to: cd infra && docker compose build
+
+# Start all services in detached mode
+make up
+# Equivalent to: cd infra && docker compose up -d --build
+
+# Stop and remove all containers + volumes
+make down
+# Equivalent to: cd infra && docker compose down -v
+# ⚠️ WARNING: This removes all data volumes
+
+# Show service status and health
+make ps
+# Equivalent to: cd infra && docker compose ps
+```
+
+#### **Log Management**
+```bash
+# Tail logs from all services (200 lines)
+make logs
+# Equivalent to: cd infra && docker compose logs -f --tail=200
+
+# Service-specific logs
+make logs-user      # User service logs only
+make logs-notif     # Notification service logs only  
+make logs-gw        # Gateway logs only
+
+# View worker logs (not in Makefile)
+docker compose -f infra/docker-compose.yml logs -f notification-worker
+
+# View logs without following
+docker compose -f infra/docker-compose.yml logs --tail=50 user-service
+docker compose -f infra/docker-compose.yml logs --tail=50 notification-service
+docker compose -f infra/docker-compose.yml logs --tail=50 gateway
+```
+
+#### **Database Management**
+```bash
+# Apply Symfony migrations
+make migrate
+# Equivalent to: cd infra && docker compose exec user-service php bin/console doctrine:migrations:migrate --no-interaction
+
+# Check migration status
+make status
+# Equivalent to: cd infra && docker compose exec user-service php bin/console doctrine:migrations:status
+```
+
+#### **Testing Commands**
+```bash
+# Run smoke tests (health checks, basic functionality)
+make smoke
+# Equivalent to: bash scripts/smoke.sh
+
+# Run end-to-end tests (complete workflow)
+make e2e
+# Equivalent to: bash scripts/e2e.sh
+
+# Export OpenAPI specifications
+make export-openapi
+# Equivalent to: bash scripts/export-openapi.sh
+```
+
+---
+
+## 📚 Complete Command Reference
+
+### **Direct Docker Compose Commands**
+
+#### **Service Management**
+```bash
+# Start specific services
+docker compose -f infra/docker-compose.yml up user-service
+docker compose -f infra/docker-compose.yml up notification-service
+docker compose -f infra/docker-compose.yml up gateway
+
+# Stop specific services
+docker compose -f infra/docker-compose.yml stop user-service
+docker compose -f infra/docker-compose.yml stop notification-service
+
+# Restart specific services
+docker compose -f infra/docker-compose.yml restart user-service
+docker compose -f infra/docker-compose.yml restart notification-service
+
+# Remove specific services
+docker compose -f infra/docker-compose.yml rm user-service
+docker compose -f infra/docker-compose.yml rm notification-service
+```
+
+#### **Image Management**
+```bash
+# Build specific service images
+docker compose -f infra/docker-compose.yml build user-service
+docker compose -f infra/docker-compose.yml build notification-service
+docker compose -f infra/docker-compose.yml build notification-worker
+
+# Build without cache
+docker compose -f infra/docker-compose.yml build --no-cache user-service
+docker compose -f infra/docker-compose.yml build --no-cache notification-service
+
+# Pull latest base images
+docker compose -f infra/docker-compose.yml pull
+```
+
+#### **Container Inspection**
+```bash
+# Show detailed container information
+docker compose -f infra/docker-compose.yml ps -a
+docker compose -f infra/docker-compose.yml ps --services
+docker compose -f infra/docker-compose.yml ps --filter "status=running"
+
+# Show container resource usage
+docker compose -f infra/docker-compose.yml top
+
+# Show container configuration
+docker compose -f infra/docker-compose.yml config
+docker compose -f infra/docker-compose.yml config --services
+```
+
+### **Container Execution Commands**
+
+#### **User Service (Symfony/PHP)**
+```bash
+# Execute commands in user-service container
+docker compose -f infra/docker-compose.yml exec user-service bash
+
+# Symfony console commands
+docker compose -f infra/docker-compose.yml exec user-service php bin/console list
+docker compose -f infra/docker-compose.yml exec user-service php bin/console debug:router
+docker compose -f infra/docker-compose.yml exec user-service php bin/console debug:container
+
+# Database operations
+docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:database:create
+docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:database:drop --force
+docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:schema:validate
+
+# Migration operations
+docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:migrations:list
+docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:migrations:generate
+docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:migrations:execute --up VERSION
+docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:migrations:execute --down VERSION
+
+# Cache operations
+docker compose -f infra/docker-compose.yml exec user-service php bin/console cache:clear
+docker compose -f infra/docker-compose.yml exec user-service php bin/console cache:warmup
+
+# Composer operations
+docker compose -f infra/docker-compose.yml exec user-service composer install
+docker compose -f infra/docker-compose.yml exec user-service composer update
+docker compose -f infra/docker-compose.yml exec user-service composer dump-autoload
+```
+
+#### **Notification Service (Node.js/Express)**
+```bash
+# Execute commands in notification-service container
+docker compose -f infra/docker-compose.yml exec notification-service bash
+
+# Node.js operations
+docker compose -f infra/docker-compose.yml exec notification-service node --version
+docker compose -f infra/docker-compose.yml exec notification-service npm --version
+
+# NPM operations
+docker compose -f infra/docker-compose.yml exec notification-service npm install
+docker compose -f infra/docker-compose.yml exec notification-service npm update
+docker compose -f infra/docker-compose.yml exec notification-service npm audit
+docker compose -f infra/docker-compose.yml exec notification-service npm audit fix
+
+# Application operations
+docker compose -f infra/docker-compose.yml exec notification-service npm start
+docker compose -f infra/docker-compose.yml exec notification-service npm run dev
+docker compose -f infra/docker-compose.yml exec notification-service npm test
+```
+
+### **Database Operations**
+
+#### **User Database (MySQL)**
+```bash
+# Connect to user database
+mysql -h localhost -P 3307 -u symfony -p userdb
+# Password: symfony
+
+# Database operations via Docker
+docker compose -f infra/docker-compose.yml exec user-db mysql -u root -p userdb
+# Password: root
+
+# Backup user database
+docker compose -f infra/docker-compose.yml exec user-db mysqldump -u root -p userdb > user_backup.sql
+
+# Restore user database
+docker compose -f infra/docker-compose.yml exec -T user-db mysql -u root -p userdb < user_backup.sql
+
+# Show user database tables
+docker compose -f infra/docker-compose.yml exec user-db mysql -u root -p -e "USE userdb; SHOW TABLES;"
+
+# Show user database structure
+docker compose -f infra/docker-compose.yml exec user-db mysql -u root -p -e "USE userdb; DESCRIBE users;"
+```
+
+#### **Notification Database (MySQL)**
+```bash
+# Connect to notification database
+mysql -h localhost -P 3308 -u node -p notifdb
+# Password: node
+
+# Database operations via Docker
+docker compose -f infra/docker-compose.yml exec notif-db mysql -u root -p notifdb
+# Password: root
+
+# Backup notification database
+docker compose -f infra/docker-compose.yml exec notif-db mysqldump -u root -p notifdb > notif_backup.sql
+
+# Restore notification database
+docker compose -f infra/docker-compose.yml exec -T notif-db mysql -u root -p notifdb < notif_backup.sql
+
+# Show notification database tables
+docker compose -f infra/docker-compose.yml exec notif-db mysql -u root -p -e "USE notifdb; SHOW TABLES;"
+
+# Show notification database structure
+docker compose -f infra/docker-compose.yml exec notif-db mysql -u root -p -e "USE notifdb; DESCRIBE notifications;"
+```
+
+### **RabbitMQ Operations**
+
+#### **Management Commands**
+```bash
+# Access RabbitMQ container
+docker compose -f infra/docker-compose.yml exec rabbitmq bash
+
+# RabbitMQ management commands
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl status
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_queues
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_exchanges
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_bindings
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_connections
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_channels
+
+# Queue management
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl purge_queue notification_queue
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl delete_queue notification_queue
+
+# User management
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_users
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl add_user newuser password
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl set_user_tags newuser administrator
+```
+
+#### **Message Publishing (Testing)**
+```bash
+# Publish test message to exchange
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqadmin publish exchange=notifications routing_key=created payload="{\"test\":\"message\"}"
+
+# Get messages from queue
+docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqadmin get queue=notification_queue
+```
+
+### **API Testing Commands**
+
+#### **Health Check Endpoints**
+```bash
+# Test all health endpoints
+curl -i http://localhost:8082/health          # Gateway health
+curl -i http://localhost:8080/health          # User service health
+curl -i http://localhost:8081/health          # Notification service health
+
+# Test readiness endpoints
+curl -i http://localhost:8080/ready           # User service readiness
+curl -i http://localhost:8081/ready           # Notification service readiness
+```
+
+#### **User Service API Testing**
+```bash
+# List all users
+curl -X GET http://localhost:8082/api/users
+curl -X GET http://localhost:8080/users       # Direct access
+
+# Create a new user
+curl -X POST http://localhost:8082/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe","email":"john@example.com"}'
+
+# Get specific user
+curl -X GET http://localhost:8082/api/users/1
+
+# Update user
+curl -X PUT http://localhost:8082/api/users/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Smith","email":"johnsmith@example.com"}'
+
+# Delete user
+curl -X DELETE http://localhost:8082/api/users/1
+
+# Send notification via user service
+curl -X POST http://localhost:8082/api/users/2/notify \
+  -H "Content-Type: application/json" \
+  -d '{"subject":"Hello","message":"Test notification"}'
+```
+
+#### **Notification Service API Testing**
+```bash
+# List all notifications
+curl -X GET http://localhost:8082/api/notifications
+curl -X GET http://localhost:8081/notifications    # Direct access
+
+# Create notification
+curl -X POST http://localhost:8082/api/notifications \
+  -H "Content-Type: application/json" \
+  -d '{"subject":"Test","message":"Hello World","recipientId":1}'
+
+# Get specific notification
+curl -X GET http://localhost:8082/api/notifications/1
+
+# Update notification
+curl -X PUT http://localhost:8082/api/notifications/1 \
+  -H "Content-Type: application/json" \
+  -d '{"subject":"Updated","message":"Updated message"}'
+
+# Delete notification
+curl -X DELETE http://localhost:8082/api/notifications/1
+```
+
+#### **Advanced API Testing**
+```bash
+# Test with correlation ID
+curl -X GET http://localhost:8082/api/users \
+  -H "X-Correlation-Id: test-12345"
+
+# Test rate limiting
+for i in {1..15}; do curl -s http://localhost:8082/api/users; done
+
+# Test CORS
+curl -X OPTIONS http://localhost:8082/api/users \
+  -H "Origin: http://localhost:3000" \
+  -H "Access-Control-Request-Method: GET" \
+  -H "Access-Control-Request-Headers: Content-Type"
+
+# Test error handling
+curl -X POST http://localhost:8082/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"invalid":"data"}'
+```
+
+### **Performance Monitoring**
+
+#### **Resource Usage**
+```bash
+# Monitor container resource usage
+docker stats
+docker stats --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
+
+# Monitor specific containers
+docker stats user-service notification-service api-gateway
+
+# Memory usage by service
+docker compose -f infra/docker-compose.yml exec user-service free -h
+docker compose -f infra/docker-compose.yml exec notification-service free -h
+
+# Disk usage
+docker system df
+docker system df -v
+```
+
+#### **Network Monitoring**
+```bash
+# Show Docker networks
+docker network ls
+docker network inspect infra_default
+
+# Monitor network traffic
+docker compose -f infra/docker-compose.yml exec gateway netstat -tuln
+docker compose -f infra/docker-compose.yml exec user-service netstat -tuln
+
+# Test network connectivity between services
+docker compose -f infra/docker-compose.yml exec user-service ping notification-service
+docker compose -f infra/docker-compose.yml exec notification-service ping user-db
+```
+
+### **Advanced Operations**
+
+#### **Scaling Services**
+```bash
+# Scale notification service to 3 instances
+docker compose -f infra/docker-compose.yml up --scale notification-service=3
+
+# Scale user service to 2 instances
+docker compose -f infra/docker-compose.yml up --scale user-service=2
+
+# View scaled services
+docker compose -f infra/docker-compose.yml ps
+```
+
+#### **Environment Variables**
+```bash
+# Show environment variables in containers
+docker compose -f infra/docker-compose.yml exec user-service env
+docker compose -f infra/docker-compose.yml exec notification-service env
+
+# Override environment variables
+APP_ENV=dev docker compose -f infra/docker-compose.yml up user-service
+PORT=3001 docker compose -f infra/docker-compose.yml up notification-service
+```
+
+#### **Volume Management**
+```bash
+# List Docker volumes
+docker volume ls
+
+# Inspect volumes
+docker volume inspect infra_user_db_data
+docker volume inspect infra_notif_db_data
+
+# Backup volumes
+docker run --rm -v infra_user_db_data:/data -v $(pwd):/backup alpine tar czf /backup/user_db_backup.tar.gz -C /data .
+docker run --rm -v infra_notif_db_data:/data -v $(pwd):/backup alpine tar czf /backup/notif_db_backup.tar.gz -C /data .
+
+# Restore volumes
+docker run --rm -v infra_user_db_data:/data -v $(pwd):/backup alpine tar xzf /backup/user_db_backup.tar.gz -C /data
+```
+
+#### **Security Operations**
+```bash
+# Scan images for vulnerabilities
+docker scout cves infra-user-service
+docker scout cves infra-notification-service
+
+# Check for outdated base images
+docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}"
+
+# Update base images
+docker compose -f infra/docker-compose.yml pull
+docker compose -f infra/docker-compose.yml build --no-cache
+```
+
+---
+
+## 📊 Compliance Matrix
 
 This section maps the project brief requirements to their implementation in this repository.
 
