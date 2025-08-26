@@ -27,8 +27,8 @@ This guide is your **developer handbook**: setup, workflows, commands, coding st
   - Users: `docs/user-service.openapi.json`
   - Notifications: `docs/notification-service.openapi.json`
 - Swagger UI via Gateway:
-  - Users UI: `http://localhost:8082/users/docs/`
-  - Notifications UI: `http://localhost:8082/notifications/docs/`
+  - Users UI: `http://localhost:8082/api/users/docs`
+  - Notifications UI: `http://localhost:8082/api/notifications/docs`
 - Postman:
   - Collection: `docs/postman/collection.json`
   - Environment: `docs/postman/environment.json`
@@ -49,7 +49,7 @@ This guide is your **developer handbook**: setup, workflows, commands, coding st
 - `make smoke`
   - Checks gateway `/health`
   - GET `/api/users`
-  - Verifies Swagger UIs under `/users/docs` and `/notifications/docs`
+  - Verifies Swagger UIs under `/api/users/docs` and `/api/notifications/docs`
   - Optional quick rate-limit probe (uses GNU parallel if installed)
 - `make e2e`
   - Creates two users (unique emails)
@@ -264,8 +264,8 @@ curl -X POST http://localhost:8082/api/users -d '{"name":"Test","email":"a@b.com
 curl -X GET http://localhost:8082/api/v1/users
 
 # Gateway-exposed API docs
-curl -I http://localhost:8082/users/docs/
-curl -I http://localhost:8082/notifications/docs/
+curl -I http://localhost:8082/api/users/docs
+curl -I http://localhost:8082/api/notifications/docs
 
 # Correlation ID example
 curl -H 'X-Correlation-Id: 123e4567-e89b-12d3-a456-426614174000' http://localhost:8082/api/users

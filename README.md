@@ -113,16 +113,16 @@ make logs-notif  # tail notification-service logs
 - 👥 User Service → http://localhost:8080/docs
 - 📧 Notification Service → http://localhost:8081/docs
 - 🐰 RabbitMQ UI → http://localhost:15672 *(guest/guest)*
-- 📚 Gateway docs (Users) → http://localhost:8082/users/docs/
-- 📚 Gateway docs (Notifications) → http://localhost:8082/notifications/docs/
+- 📚 Gateway docs (Users) → http://localhost:8082/api/users/docs
+- 📚 Gateway docs (Notifications) → http://localhost:8082/api/notifications/docs
 
 #### Direct vs Gateway URLs
 - Prefer the gateway for client access. Direct service URLs are helpful for debugging.
 
 | Target                | Gateway URL                                      | Direct URL              | Docs via Gateway                              |
 |-----------------------|---------------------------------------------------|-------------------------|-----------------------------------------------|
-| Users API             | http://localhost:8082/api/users (or /api/v1/users) | http://localhost:8080   | http://localhost:8082/users/docs/             |
-| Notifications API     | http://localhost:8082/api/notifications (or /api/v1/notifications) | http://localhost:8081   | http://localhost:8082/notifications/docs/     |
+| Users API             | http://localhost:8082/api/users (or /api/v1/users) | http://localhost:8080   | http://localhost:8082/api/users/docs          |
+| Notifications API     | http://localhost:8082/api/notifications (or /api/v1/notifications) | http://localhost:8081   | http://localhost:8082/api/notifications/docs  |
 
 ---
 
@@ -179,7 +179,7 @@ Key principles:
   - Gateway routes: `/api/users`, `/api/v1/users`
   - Health: `GET /ready`, `GET /health`
   - Database: `userdb` (container: `user-db`)
-  - API docs: via gateway `http://localhost:8082/users/docs/`
+  - API docs: via gateway `http://localhost:8082/api/users/docs`
 
 - __Notification Service (Express + MySQL)__
   - Purpose: manage notifications
@@ -187,7 +187,7 @@ Key principles:
   - Gateway routes: `/api/notifications`, `/api/v1/notifications`
   - Health: `GET /ready`, `GET /health`
   - Database: `notifdb` (container: `notif-db`)
-  - API docs: via gateway `http://localhost:8082/notifications/docs/`
+  - API docs: via gateway `http://localhost:8082/api/notifications/docs`
 
 - __Notification Worker (Node.js + RabbitMQ)__
   - Purpose: consumes events (e.g., `user.created`) and creates notifications
@@ -277,8 +277,8 @@ Prefer versioned routes (`/api/v1/...`) for client integrations to enable safe e
   - Users: `docs/user-service.openapi.json`
   - Notifications: `docs/notification-service.openapi.json`
 - Swagger UI via Gateway:
-  - Users UI: `http://localhost:8082/users/docs/`
-  - Notifications UI: `http://localhost:8082/notifications/docs/`
+  - Users UI: `http://localhost:8082/api/users/docs`
+  - Notifications UI: `http://localhost:8082/api/notifications/docs`
 - Postman:
   - Collection: `docs/postman/collection.json`
   - Environment: `docs/postman/environment.json`

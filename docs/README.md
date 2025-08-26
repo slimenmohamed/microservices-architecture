@@ -9,8 +9,8 @@ For the full project overview and setup instructions, see the root [README.md](.
 - Notification Service: `notification-service.openapi.json`
 
 You can view these specs via the API Gateway as Swagger UI:
-- Users UI: http://localhost:8082/users/docs/
-- Notifications UI: http://localhost:8082/notifications/docs/
+- Users UI: http://localhost:8082/api/users/docs
+- Notifications UI: http://localhost:8082/api/notifications/docs
 
 ## Postman
 - Collection: `postman/collection.json`
@@ -41,12 +41,12 @@ make export-openapi
 
 ## Endpoints, Docs, and Health
 
-| Service              | Gateway Docs                         | Gateway API (primary)                    | Direct URL              | Health/Readiness           |
-|----------------------|--------------------------------------|------------------------------------------|-------------------------|----------------------------|
-| API Gateway          | —                                    | —                                        | http://localhost:8082   | GET `/health`              |
-| User Service         | http://localhost:8082/users/docs/    | `/api/users` (or `/api/v1/users`)        | http://localhost:8080   | GET `/ready`               |
-| Notification Service | http://localhost:8082/notifications/docs/ | `/api/notifications` (or `/api/v1/notifications`) | http://localhost:8081   | GET `/ready`               |
-| Notification Worker  | —                                    | — (consumes RabbitMQ events)             | —                       | via container status/logs  |
+| Service              | Gateway Docs                              | Gateway API (primary)                    | Direct URL              | Health/Readiness           |
+|----------------------|-------------------------------------------|------------------------------------------|-------------------------|----------------------------|
+| API Gateway          | —                                         | —                                        | http://localhost:8082   | GET `/health`              |
+| User Service         | http://localhost:8082/api/users/docs      | `/api/users` (or `/api/v1/users`)        | http://localhost:8080   | GET `/ready`               |
+| Notification Service | http://localhost:8082/api/notifications/docs | `/api/notifications` (or `/api/v1/notifications`) | http://localhost:8081   | GET `/ready`               |
+| Notification Worker  | —                                         | — (consumes RabbitMQ events)             | —                       | via container status/logs  |
 
 ### Observability
 - Correlation IDs: pass header `X-Correlation-ID` in requests to the gateway; it is forwarded to services and shows up in logs. Example:
