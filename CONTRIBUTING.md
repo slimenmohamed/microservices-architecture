@@ -63,7 +63,10 @@ This guide is your **developer handbook**: setup, workflows, commands, coding st
 ## 🔎 Observability & Limits
 
 - Correlation IDs: pass `X-Correlation-ID` header; gateway forwards to services and logs. Use `make logs`, `make logs-gw`.
-- Rate limiting: ~10 req/s per IP with burst 20 at the gateway. Excess requests can receive HTTP 429.
+- Rate limiting: templated per environment via gateway config.
+  - CI defaults: `GW_RATE_LIMIT=100r/s`, `GW_BURST=200` (avoid flaky tests)
+  - Production: tune lower (e.g., `20r/s`, burst `40`) per SLOs
+  - Generate config: `make gw-build-conf` (uses `infra/nginx/conf.d/default.conf.template`)
 
 ### Logs
 - Tail all: `make logs`

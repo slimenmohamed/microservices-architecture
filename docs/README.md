@@ -23,6 +23,16 @@ http://localhost:8082
 
 > Routing note: You can call the gateway using unversioned routes (`/api/...`) or versioned routes (`/api/v1/...`). Prefer versioned routes for client applications to ensure forward compatibility.
 
+## Diagrams
+
+- Architecture (SVG): `architecture.svg` (source: `architecture.mmd`)
+- Communication (SVG): `communication.svg` (source: `communication.mmd`)
+
+Render both diagrams with:
+```
+make render-diagrams
+```
+
 ## Regenerating OpenAPI
 If you make API changes, export fresh OpenAPI specs and update Postman if needed:
 ```

@@ -161,7 +161,7 @@ For a step-by-step guide to add a new microservice, see [docs/ADDING_A_SERVICE.m
 
 ## 🏗️ Architecture
 
-![Architecture](docs/communication.svg)
+![Architecture](docs/architecture.svg)
 
 The diagram includes the service-specific MySQL databases (`user-db`, `notif-db`) and RabbitMQ used for asynchronous messaging.
 
@@ -201,6 +201,8 @@ Key principles:
   - Load balancing: upstreams with `least_conn` and DNS `resolve`
 
 ### Communication Diagram
+
+![Communication](docs/communication.svg)
 
 ```mermaid
 sequenceDiagram
@@ -242,7 +244,7 @@ sequenceDiagram
     GW-->>C: 200 OK + List
 ```
 
-To generate an SVG version: `make render-diagrams` → outputs `docs/communication.svg`. See also `docs/communication.mmd`.
+To generate SVGs: `make render-diagrams` → outputs `docs/communication.svg` and `docs/architecture.svg`. See also `docs/communication.mmd` and `docs/architecture.mmd`.
 
 ---
 

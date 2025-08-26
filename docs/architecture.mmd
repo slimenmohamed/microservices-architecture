@@ -1,0 +1,44 @@
+%% High-level architecture diagram
+graph LR
+  subgraph Client
+    U[User]
+  end
+
+  GW[API Gateway - Nginx]
+
+  subgraph Services
+    US[User Service - Symfony PHP]
+    NS[Notification Service - Node.js Express]
+    NW[Notification Worker - Node.js]
+  end
+
+  subgraph Databases
+    UDB[(MySQL userdb)]
+    NDB[(MySQL notifdb)]
+  end
+
+  MQ[(RabbitMQ)]
+
+  %% Edges
+  U --> GW
+  %% Gateway routing to services
+  GW --> US
+  GW --> NS
+
+  %% Service DB ownership
+  US --- UDB
+  NS --- NDB
+
+  %% Async messaging
+  US -.-> MQ
+  MQ -.-> NW
+  NW --> NS
+
+  %% Notes
+  classDef svc fill:#e3f2fd,stroke:#90caf9,stroke-width:1px;
+  classDef db fill:#f3e5f5,stroke:#ba68c8,stroke-width:1px;
+  classDef gw fill:#e8f5e9,stroke:#81c784,stroke-width:1px;
+
+  class US,NS,NW svc;
+  class UDB,NDB db;
+  class GW gw;
