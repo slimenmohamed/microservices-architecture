@@ -1,0 +1,128 @@
+services:
+  user-db:
+    image: mysql:8.0
+    container_name: user-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: userdb
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    ports:
+      - "3307:3306"
+    volumes:
+      - user_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  notification-worker:
+    build:
+      context: ../notification-service
+      dockerfile: Dockerfile
+    container_name: notification-worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      notif-db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DB_HOST: notif-db
+      DB_PORT: 3306
+      DB_USER: node
+      DB_PASSWORD: node
+      DB_NAME: notifdb
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      NOTIF_EXCHANGE: notifications
+    command: ["npm", "run", "worker"]
+  user-service:
+    build:
+      context: ../user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    depends_on:
+      user-db:
+        condition: service_healthy
+    environment:
+      APP_ENV: prod
+      DATABASE_URL: mysql://symfony:symfony@user-db:3306/userdb
+    ports:
+      - "8080:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/ready || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  notif-db:
+    image: mysql:8.0
+    container_name: notif-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notifdb
+      MYSQL_USER: node
+      MYSQL_PASSWORD: node
+    ports:
+      - "3308:3306"
+    volumes:
+      - notif_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  notification-service:
+    build:
+      context: ../notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    depends_on:
+      notif-db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DB_HOST: notif-db
+      DB_PORT: 3306
+      DB_USER: node
+      DB_PASSWORD: node
+      DB_NAME: notifdb
+    ports:
+      - "8081:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ready || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: api-gateway
+    depends_on:
+      user-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+    ports:
+      - "8082:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  user_db_data:
+  notif_db_data:
+  # RabbitMQ data is ephemeral by default; add a named volume if persistence is needed

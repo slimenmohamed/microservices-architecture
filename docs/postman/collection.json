@@ -1,0 +1,45 @@
+{
+  "info": {
+    "name": "Microservices Architecture - Gateway",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Gateway-based requests for user-service and notification-service"
+  },
+  "item": [
+    {
+      "name": "List Users",
+      "request": { "method": "GET", "url": "http://localhost:8082/api/users" }
+    },
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\"\n}"
+        },
+        "url": "http://localhost:8082/api/users"
+      }
+    },
+    {
+      "name": "Notify User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subject\": \"Hello\",\n  \"message\": \"Hi from sender\"\n}"
+        },
+        "url": "http://localhost:8082/api/users/{{recipientId}}/notify"
+      }
+    },
+    {
+      "name": "Get Notification by ID",
+      "request": { "method": "GET", "url": "http://localhost:8082/api/notifications/{{notificationId}}" }
+    }
+  ],
+  "variable": [
+    { "key": "recipientId", "value": "1" },
+    { "key": "notificationId", "value": "1" }
+  ]
+}

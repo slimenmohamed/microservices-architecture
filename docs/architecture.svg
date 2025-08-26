@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="380" viewBox="0 0 880 380" font-family="Arial, Helvetica, sans-serif">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <style>
+    .box { fill:#f7f9fc; stroke:#2c3e50; stroke-width:1.5; }
+    .title { font-size:14px; font-weight:bold; fill:#2c3e50; }
+    .text { font-size:12px; fill:#2c3e50; }
+    .arrow { stroke:#2c3e50; stroke-width:1.5; marker-end:url(#arrowhead); fill:none; }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2c3e50"/>
+    </marker>
+  </defs>
+
+  <!-- Clients -->
+  <rect class="box" x="30" y="30" width="140" height="60" rx="6"/>
+  <text class="title" x="100" y="60" text-anchor="middle">Clients</text>
+
+  <!-- Gateway -->
+  <rect class="box" x="240" y="30" width="160" height="60" rx="6"/>
+  <text class="title" x="320" y="55" text-anchor="middle">API Gateway</text>
+  <text class="text" x="320" y="72" text-anchor="middle">Nginx</text>
+
+  <!-- Arrows: Clients -> Gateway -->
+  <line class="arrow" x1="170" y1="60" x2="240" y2="60" />
+
+  <!-- user-service -->
+  <rect class="box" x="160" y="140" width="180" height="80" rx="6"/>
+  <text class="title" x="250" y="165" text-anchor="middle">user-service</text>
+  <text class="text" x="250" y="185" text-anchor="middle">Symfony (PHP)</text>
+  <text class="text" x="250" y="202" text-anchor="middle">/api/users</text>
+
+  <!-- notification-service -->
+  <rect class="box" x="420" y="140" width="200" height="80" rx="6"/>
+  <text class="title" x="520" y="165" text-anchor="middle">notification-service</text>
+  <text class="text" x="520" y="185" text-anchor="middle">Express (Node.js)</text>
+  <text class="text" x="520" y="202" text-anchor="middle">/api/notifications</text>
+
+  <!-- DBs -->
+  <rect class="box" x="160" y="260" width="180" height="70" rx="6"/>
+  <text class="title" x="250" y="285" text-anchor="middle">user-db</text>
+  <text class="text" x="250" y="305" text-anchor="middle">MySQL</text>
+
+  <rect class="box" x="420" y="260" width="200" height="70" rx="6"/>
+  <text class="title" x="520" y="285" text-anchor="middle">notif-db</text>
+  <text class="text" x="520" y="305" text-anchor="middle">MySQL</text>
+
+  <!-- RabbitMQ -->
+  <rect class="box" x="660" y="140" width="180" height="80" rx="6"/>
+  <text class="title" x="750" y="165" text-anchor="middle">RabbitMQ (optional)</text>
+  <text class="text" x="750" y="185" text-anchor="middle">5672 / 15672</text>
+  <text class="text" x="750" y="202" text-anchor="middle">notifications exchange</text>
+
+  <!-- Arrows: Gateway -> Services -->
+  <line class="arrow" x1="320" y1="90" x2="250" y2="140" />
+  <line class="arrow" x1="360" y1="90" x2="520" y2="140" />
+
+  <!-- Arrows: Services -> DBs -->
+  <line class="arrow" x1="250" y1="220" x2="250" y2="260" />
+  <line class="arrow" x1="520" y1="220" x2="520" y2="260" />
+
+  <!-- Arrows: notification-service -> RabbitMQ -->
+  <line class="arrow" x1="620" y1="180" x2="660" y2="180" />
+
+  <!-- Worker -->
+  <rect class="box" x="660" y="260" width="180" height="70" rx="6"/>
+  <text class="title" x="750" y="285" text-anchor="middle">notification-worker</text>
+  <text class="text" x="750" y="305" text-anchor="middle">consumes events</text>
+  <!-- Arrow: RabbitMQ -> Worker (consume) -->
+  <line class="arrow" x1="750" y1="220" x2="750" y2="260" />
+</svg>
