@@ -5,11 +5,43 @@ GATEWAY="${GATEWAY_URL:-http://localhost:8082}"
 pass() { echo -e "\e[32m✔\e[0m $1"; }
 fail() { echo -e "\e[31m✖\e[0m $1"; exit 1; }
 
-# Health
-curl -fsS "$GATEWAY/health" >/dev/null && pass "Gateway health ok" || fail "Gateway health failed"
+# Retry helper: curl with retries
+curl_retry() {
+  local url="$1"; shift
+  local max=${CURL_MAX_RETRIES:-20}
+  local delay=${CURL_RETRY_DELAY_SECS:-2}
+  local i=1
+  while true; do
+    if out=$(curl -sS -w "\n%{http_code}" "$url" "$@" 2>&1); then
+      body="$(echo "$out" | sed '$d')"
+      code="$(echo "$out" | tail -n1)"
+      if [[ "$code" =~ ^2..$ ]]; then
+        echo "$body"
+        return 0
+      fi
+    else
+      body="$out"; code=""
+    fi
+    if (( i >= max )); then
+      echo "[curl_retry] Failed after $i attempts: $url" >&2
+      echo "[curl_retry] Last HTTP code: ${code:-n/a}" >&2
+      echo "[curl_retry] Last output:" >&2
+      echo "$body" >&2
+      return 1
+    fi
+    sleep "$delay"; i=$((i+1))
+  done
+}
+
+# Health (retry until gateway is responding 200)
+curl_retry "$GATEWAY/health" >/dev/null && pass "Gateway health ok" || fail "Gateway health failed"
 
 # Users list
-resp=$(curl -fsS "$GATEWAY/api/users") && echo "$resp" | jq . >/dev/null 2>&1 && pass "List users ok" || fail "List users failed"
+if resp=$(curl_retry "$GATEWAY/api/users"); then
+  echo "$resp" | jq . >/dev/null 2>&1 && pass "List users ok" || { echo "$resp"; fail "List users failed (invalid JSON)"; }
+else
+  fail "List users failed"
+fi
 
 # Docs
 curl -fsS "$GATEWAY/users/docs" >/dev/null && pass "Users Swagger UI ok" || fail "Users docs failed"
