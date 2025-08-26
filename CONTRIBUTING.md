@@ -4,6 +4,13 @@
 
 [![CI](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml/badge.svg)](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml)
 
+## ℹ️ About this guide
+
+This document is the comprehensive developer reference for this repo. It contains the full set of commands, workflows, troubleshooting tips, and standards.
+
+- For a project overview, architecture, and quick start: see README.md.
+- For detailed development operations (Docker Compose, DB/RabbitMQ, API testing, maintenance): use this guide.
+
 ## 📋 Table of Contents
 
 ### 🚀 **Getting Started**
@@ -374,18 +381,24 @@ docker run --rm -v infra_user_db_data:/data -v $(pwd):/backup alpine tar xzf /ba
 docker run --rm -v infra_notif_db_data:/data -v $(pwd):/backup alpine tar xzf /backup/notif_db_backup.tar.gz -C /data
 ```
 
-#### **Security and Maintenance**
+#### **Maintenance (Cleanup and pruning)**
 ```bash
-# Image security scanning
-docker scout cves infra-user-service
-docker scout cves infra-notification-service
+# Stop and remove containers, networks, and volumes
+docker compose -f infra/docker-compose.yml down -v
 
-# Image management
+# Image and resource cleanup (use with care)
 docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}"
 docker image prune -f
 docker container prune -f
 docker volume prune -f
 docker system prune -af
+```
+
+#### **Security Scanning**
+```bash
+# Image security scanning
+docker scout cves infra-user-service
+docker scout cves infra-notification-service
 
 # Update base images
 docker compose -f infra/docker-compose.yml pull
