@@ -37,17 +37,37 @@ jobs:
       - name: Make up (build and start stack)
         run: make up
 
-      - name: Wait for gateway health
+      - name: Wait for services to be ready
         run: |
           set -e
-          for i in {1..60}; do
-            if curl -fsS http://localhost:8082/health >/dev/null; then
-              echo "Gateway is up"
-              exit 0
+          echo "Waiting for services to start..."
+          sleep 30
+          
+          echo "Checking service health..."
+          for i in {1..30}; do
+            echo "Attempt $i/30..."
+            
+            # Check if gateway is responding
+            if curl -fsS http://localhost:8082/health >/dev/null 2>&1; then
+              echo "✅ Gateway health check passed"
+              
+              # Also verify services are accessible
+              if curl -fsS http://localhost:8080/health >/dev/null 2>&1 && \
+                 curl -fsS http://localhost:8081/health >/dev/null 2>&1; then
+                echo "✅ All services are healthy"
+                exit 0
+              fi
             fi
-            sleep 2
+            
+            echo "Services not ready yet, waiting..."
+            sleep 5
           done
-          echo "Gateway failed to become healthy" >&2
+          
+          echo "❌ Services failed to become healthy within timeout"
+          echo "Checking container status:"
+          make ps || true
+          echo "Gateway logs:"
+          make logs-gw || true
           exit 1
 
       - name: Migrate user-service
