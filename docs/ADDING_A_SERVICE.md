@@ -6,6 +6,46 @@ It covers project layout, Dockerfile, docker-compose integration, database owner
 
 ---
 
+## Quick Reference
+
+| Item                 | Example |
+|----------------------|---------|
+| Service (prose)      | Reporting Service |
+| Service folder       | `reporting-service/` |
+| Compose service name | `reporting-service` |
+| Internal port        | `3002` |
+| Direct debug URL     | `http://localhost:8083` (maps 8083→3002) |
+| Gateway API          | `/api/reporting` and `/api/v1/reporting` |
+| Docs (optional)      | `/reporting/docs/` via gateway passthrough |
+| Health endpoints     | Liveness: `GET /health` · Readiness: `GET /ready` |
+
+> Tip: Use distinct ports and names to avoid clashes with User/Notification services.
+
+---
+
+## Ports and Routes
+
+| Item                 | Value |
+|----------------------|-------|
+| Internal port        | `3002`
+| Host debug port      | `8083` (maps to 3002)
+| Direct debug URL     | `http://localhost:8083`
+| Gateway (unversioned)| `/api/reporting` and `/api/reporting/...`
+| Gateway (versioned)  | `/api/v1/reporting` and `/api/v1/reporting/...`
+| Optional docs path   | `/reporting/docs/` (proxied by gateway if configured)
+
+---
+
+## Version Control Tip
+
+Create a feature branch before starting, e.g.:
+
+```bash
+git checkout -b feat/reporting-service
+```
+
+---
+
 ## 1) Project Layout
 
 ```
@@ -26,6 +66,7 @@ microservices-architecture/
 Naming recommendations:
 - Folder: `reporting-service/`
 - Container/service name in Compose: `reporting-service`
+- Prose naming: "Reporting Service"
 - API base path (gateway): `/api/reporting` and `/api/v1/reporting`
 
 ---
@@ -89,7 +130,7 @@ services:
       DB_PASSWORD: app
       DB_NAME: reportingdb
     ports:
-      - "8083:3002"  # optional direct access for debugging
+      - "8083:3002"  # optional direct access for debugging (distinct from existing services)
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:3002/ready || exit 1"]
       interval: 5s
@@ -111,6 +152,10 @@ Notes:
 Expose at least:
 - `GET /health` → liveness
 - `GET /ready` → readiness
+
+Guidance:
+- `/health` can be a fast 200 OK (process is alive); minimal dependencies.
+- `/ready` should verify downstreams (DB, queues) if needed.
 
 The Compose healthcheck should probe `/ready`.
 
@@ -178,6 +223,8 @@ make restart-gw
 make gw-config-test  # validate config inside the container
 ```
 
+> Important: Always run `make gw-config-test` before restart to validate Nginx syntax.
+
 ---
 
 ## 6) OpenAPI Export
@@ -189,6 +236,10 @@ Use the helper:
 ```bash
 make export-openapi
 ```
+
+Notes:
+- Include all public routes in your OpenAPI so Postman/clients can consume them from `docs/`.
+- If you expose Swagger UI at `/docs` in the service, you can optionally proxy it via the gateway.
 
 ---
 
@@ -244,3 +295,10 @@ The gateway is configured with `least_conn` and DNS `resolve` to distribute requ
 - Smoke/E2E flows updated
 - Optional scaling target in Makefile
 - Documentation updated (this guide)
+
+---
+
+## See Also
+
+- Root overview and setup: `../README.md`
+- Contributor workflow and advanced commands: `../CONTRIBUTING.md`

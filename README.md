@@ -14,6 +14,21 @@
 
 ---
 
+## 🧰 Tech Stack
+
+| Area            | Tools |
+|-----------------|-------|
+| Languages       | PHP 8.2, Node.js 20 |
+| Frameworks      | Symfony (User Service), Express (Notification Service) |
+| Databases       | MySQL per service (user-db, notif-db) |
+| Messaging       | RabbitMQ |
+| Gateway         | Nginx (reverse proxy, rate limiting, CORS) |
+| CI/CD           | GitHub Actions (build, test, optional GHCR push, optional SSH deploy) |
+| Containers      | Docker, Docker Compose v2 |
+| Docs/Diagrams   | OpenAPI, Postman, Mermaid (communication), SVG (rendered) |
+
+---
+
 ## 📋 Overview
 
 This repository demonstrates a **complete microservices architecture** with two independent services, implementing industry best practices:
@@ -42,6 +57,15 @@ make up
 
 ---
 
+## ✅ Prerequisites
+
+- Docker 20.10+ and Docker Compose v2
+- GNU Make
+- Node.js 20 (for local development of notification/worker)
+- PHP 8.2 (for local development of user-service)
+
+---
+
 ## 🚀 Quick Setup
 
 ### 1. Clone Repository
@@ -60,6 +84,8 @@ make up   # starts all containers
 make ps          # check service health
 make smoke       # run quick health checks
 make e2e         # run end-to-end tests
+make logs-user   # tail user-service logs
+make logs-notif  # tail notification-service logs
 ```
 
 ### 4. Access Services
@@ -86,7 +112,7 @@ make e2e         # run end-to-end tests
 make up       # build + start everything
 make down     # stop and remove containers + volumes
 make ps       # show services and health
-make logs     # tail logs (use logs-user | logs-notif | logs-gw)
+make logs     # tail logs (use logs-user | logs-notif | logs-gw for specific ones)
 make smoke    # quick checks
 make e2e      # full workflow tests
 make restart-gw     # restart gateway only
@@ -116,6 +142,8 @@ For a step-by-step guide to add a new microservice, see [docs/ADDING_A_SERVICE.m
 ## 🏗️ Architecture
 
 ![Architecture](docs/architecture.svg)
+
+The diagram includes the service-specific MySQL databases (`user-db`, `notif-db`) and RabbitMQ used for asynchronous messaging.
 
 Key principles:
 - Each service owns its data (no shared DB)

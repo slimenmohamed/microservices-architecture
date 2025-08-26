@@ -6,6 +6,21 @@ This guide is your **developer handbook**: setup, workflows, commands, coding st
 
 ---
 
+## 🧰 Tech Stack Overview
+
+| Area            | Tools |
+|-----------------|-------|
+| Languages       | PHP 8.2, Node.js 20 |
+| Frameworks      | Symfony (User Service), Express (Notification Service) |
+| Databases       | MySQL per service (user-db, notif-db) |
+| Messaging       | RabbitMQ |
+| Gateway         | Nginx (reverse proxy, rate limiting, CORS) |
+| CI/CD           | GitHub Actions (build, test, optional GHCR push, optional SSH deploy) |
+| Containers      | Docker, Docker Compose v2 |
+| Docs/Diagrams   | OpenAPI, Postman, Mermaid (communication), SVG (rendered) |
+
+---
+
 ## 📚 API Docs & Postman
 
 - OpenAPI (JSON):
@@ -47,7 +62,7 @@ This guide is your **developer handbook**: setup, workflows, commands, coding st
 
 ## 🔎 Observability & Limits
 
-- Correlation IDs: pass `X-Correlation-Id` header; gateway forwards to services and logs. Use `make logs`, `make logs-gw`.
+- Correlation IDs: pass `X-Correlation-ID` header; gateway forwards to services and logs. Use `make logs`, `make logs-gw`.
 - Rate limiting: ~10 req/s per IP with burst 20 at the gateway. Excess requests can receive HTTP 429.
 
 ### Logs
@@ -56,15 +71,20 @@ This guide is your **developer handbook**: setup, workflows, commands, coding st
 - Filter by correlation id example:
   ```bash
   CORR=$(uuidgen)
-  curl -H "X-Correlation-Id: $CORR" http://localhost:8082/api/users >/dev/null
+  curl -H "X-Correlation-ID: $CORR" http://localhost:8082/api/users >/dev/null
   docker compose -f infra/docker-compose.yml logs gateway | grep "$CORR"
   ```
+
+Example log line (gateway):
+```
+2025-08-26T14:12:03Z gateway INFO request_completed correlation_id=2f1a9e65-1234-4b2c-9a9a-abcdef status=200 method=GET path=/api/users duration_ms=12
+```
 
 ---
 
 ## 🧭 Dev vs Prod modes
 
-- The `user-service` container defaults to `APP_ENV=prod` (`infra/docker-compose.yml`).
+- The User Service container defaults to `APP_ENV=prod` (`infra/docker-compose.yml`).
 - For local development, you can switch to dev mode by setting `APP_ENV=dev` and then:
   ```bash
   make restart-user
@@ -77,6 +97,7 @@ This guide is your **developer handbook**: setup, workflows, commands, coding st
 - [Adding a New Microservice](docs/ADDING_A_SERVICE.md)
 - [Daily Development Workflow](#daily-development-workflow)
 - [Command Reference](#command-reference)
+ - [Cleanup](#cleanup)
 - [Coding Standards](#coding-standards)
 - [Commit Conventions](#commit-conventions)
 - [PR Workflow](#pr-workflow)
@@ -162,6 +183,11 @@ make restart-gw      # restart gateway only
 make restart-user    # restart user-service only
 make restart-notif   # restart notification-service only
 make restart-all     # restart all services
+```
+
+### Cleanup
+```bash
+make down   # stop containers and remove associated volumes (full cleanup)
 ```
 
 ### Database Development
