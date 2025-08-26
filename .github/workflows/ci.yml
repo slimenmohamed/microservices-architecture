@@ -34,6 +34,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Build gateway config (CI limits)
+        run: |
+          export GW_RATE_LIMIT=100r/s
+          export GW_BURST=200
+          make gw-build-conf
+
       - name: Make up (build and start stack)
         run: make up
 
