@@ -7,10 +7,30 @@
 ![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white)
 ![Node](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
 [![CI](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml/badge.svg)](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml)
-![• smoke script](scripts/smoke.sh) · ![• e2e script](scripts/e2e.sh)
+[• smoke script](scripts/smoke.sh) · [• e2e script](scripts/e2e.sh)
 
 [![OpenAPI Users](https://img.shields.io/badge/OpenAPI-Users-0366d6)](docs/user-service.openapi.json)
 [![OpenAPI Notifications](https://img.shields.io/badge/OpenAPI-Notifications-0366d6)](docs/notification-service.openapi.json)
+
+---
+
+## 🌐 Environment-based Gateway Limits
+
+You can generate the gateway config from a template with environment-specific rate limits.
+
+- Template: `infra/nginx/conf.d/default.conf.template`
+- Variables:
+  - `GW_RATE_LIMIT` (e.g., `20r/s`)
+  - `GW_BURST` (e.g., `40`)
+
+Example (generate config then restart gateway):
+
+```bash
+GW_RATE_LIMIT=20r/s GW_BURST=40 make gw-build-conf
+make restart-gw
+```
+
+CI uses more lenient defaults; tune production as needed.
 
 ---
 
@@ -141,7 +161,7 @@ For a step-by-step guide to add a new microservice, see [docs/ADDING_A_SERVICE.m
 
 ## 🏗️ Architecture
 
-![Architecture](docs/architecture.svg)
+![Architecture](docs/communication.svg)
 
 The diagram includes the service-specific MySQL databases (`user-db`, `notif-db`) and RabbitMQ used for asynchronous messaging.
 
@@ -226,6 +246,18 @@ To generate an SVG version: `make render-diagrams` → outputs `docs/communicati
 
 ---
 
+## 🧠 Design Decisions
+
+- __Service-per-database__: each service fully owns its schema and persistence (`userdb`, `notifdb`). No cross-service DB access.
+- __Gateway routing__: explicit Nginx locations (prefix + exact), not broad regex, to avoid implicit 301 redirects.
+- __Host header preservation__: `proxy_set_header Host $http_host` to keep original host:port and prevent upstream redirects.
+- __Versioning__: both `/api/...` and `/api/v1/...` supported; clients should prefer versioned endpoints.
+- __Rate limiting__: lenient defaults in CI to avoid false 503s; production should use stricter settings (see below).
+- __Async messaging__: RabbitMQ is used for decoupling (worker consumes events to create notifications).
+- __CI stability__: migrations run explicitly; gateway config is syntax-checked with `nginx -t` in CI.
+
+---
+
 ## 🔢 API Versioning
 
 The gateway supports both unversioned and versioned routes:
@@ -265,7 +297,10 @@ For detailed documentation resources and regeneration steps, see [docs/README.md
 ## 🔎 Observability & Limits
 
 - Correlation IDs: send `X-Correlation-Id: <uuid>` in requests via the gateway; it’s forwarded to services and appears in logs (`make logs`, `make logs-gw`).
-- Rate limiting: gateway enforces ~10 req/s per IP with burst 20. Flooding a route may yield HTTP 429.
+- __Rate limiting__: templated per environment.
+  - CI defaults: `GW_RATE_LIMIT=100r/s`, `GW_BURST=200` (avoids flaky tests under load)
+  - Production: set lower values appropriate to your SLOs (e.g., `GW_RATE_LIMIT=20r/s`, `GW_BURST=40`)
+  - See “Environment-based gateway limits” below.
 
 ### Correlation ID examples
 
