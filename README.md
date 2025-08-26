@@ -7,7 +7,7 @@
 ![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white)
 ![Node](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
 [![CI](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml/badge.svg)](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml)
-[• smoke script](scripts/smoke.sh) · [• e2e script](scripts/e2e.sh)
+![• smoke script](scripts/smoke.sh) · ![• e2e script](scripts/e2e.sh)
 
 [![OpenAPI Users](https://img.shields.io/badge/OpenAPI-Users-0366d6)](docs/user-service.openapi.json)
 [![OpenAPI Notifications](https://img.shields.io/badge/OpenAPI-Notifications-0366d6)](docs/notification-service.openapi.json)
