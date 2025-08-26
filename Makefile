@@ -88,7 +88,7 @@ gw-build-conf: ## Generate gateway config from template (uses GW_RATE_LIMIT, GW_
 	@which envsubst >/dev/null 2>&1 || { echo "envsubst is required (install gettext-base)" >&2; exit 1; }
 	@echo "Generating infra/nginx/conf.d/default.conf from template..."
 	@GW_RATE_LIMIT="$${GW_RATE_LIMIT:-100r/s}" GW_BURST="$${GW_BURST:-200}" \
-		envsubst < infra/nginx/conf.d/default.conf.template > infra/nginx/conf.d/default.conf
+		envsubst '$$GW_RATE_LIMIT $$GW_BURST' < infra/nginx/conf.d/default.conf.template > infra/nginx/conf.d/default.conf
 	@echo "Wrote infra/nginx/conf.d/default.conf"
 
 ## -----------------------------
