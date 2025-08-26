@@ -748,11 +748,11 @@ Notes:
 
 ## Quick Tests
 
-See CONTRIBUTING.md (API Testing and Development) for ready-to-run curl snippets and Makefile shortcuts covering health checks, CRUD operations, and the end-to-end notification flow via the gateway.
+See [CONTRIBUTING.md#api-testing-and-development](CONTRIBUTING.md#api-testing-and-development) for ready-to-run curl snippets and Makefile shortcuts covering health checks, CRUD operations, and the end-to-end notification flow via the gateway.
 
 ## Cleanup
 
-To remove containers, networks, and volumes: see the Maintenance section in CONTRIBUTING.md (includes safe cleanup and pruning commands).
+To remove containers, networks, and volumes: see [CONTRIBUTING.md#maintenance-cleanup-and-pruning](CONTRIBUTING.md#maintenance-cleanup-and-pruning) (includes safe cleanup and pruning commands).
 
 ---
 
