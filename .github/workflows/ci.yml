@@ -37,38 +37,57 @@ jobs:
       - name: Make up (build and start stack)
         run: make up
 
-      - name: Wait for services to be ready
+      - name: Wait for Docker Compose services
         run: |
           set -e
-          echo "Waiting for services to start..."
-          sleep 30
+          echo "Waiting for Docker Compose to report services as healthy..."
           
-          echo "Checking service health..."
-          for i in {1..30}; do
-            echo "Attempt $i/30..."
-            
-            # Check if gateway is responding
-            if curl -fsS http://localhost:8082/health >/dev/null 2>&1; then
-              echo "✅ Gateway health check passed"
-              
-              # Also verify services are accessible
-              if curl -fsS http://localhost:8080/health >/dev/null 2>&1 && \
-                 curl -fsS http://localhost:8081/health >/dev/null 2>&1; then
-                echo "✅ All services are healthy"
-                exit 0
+          # Wait for compose services to be healthy (uses healthchecks)
+          timeout 300 bash -c '
+            while true; do
+              if docker compose -f infra/docker-compose.yml ps --format json | jq -r ".[].Health" | grep -v "healthy" | grep -q .; then
+                echo "Some services not healthy yet..."
+                docker compose -f infra/docker-compose.yml ps
+                sleep 10
+              else
+                echo "✅ All services report healthy"
+                break
               fi
-            fi
-            
-            echo "Services not ready yet, waiting..."
-            sleep 5
+            done
+          ' || {
+            echo "❌ Timeout waiting for services to be healthy"
+            echo "Final container status:"
+            docker compose -f infra/docker-compose.yml ps
+            echo "Logs from all services:"
+            docker compose -f infra/docker-compose.yml logs --tail=50
+            exit 1
+          }
+
+      - name: Verify HTTP endpoints
+        run: |
+          set -e
+          echo "Testing HTTP endpoints..."
+          
+          # Test each endpoint with retries
+          for endpoint in "http://localhost:8082/health" "http://localhost:8080/health" "http://localhost:8081/health"; do
+            echo "Testing $endpoint..."
+            for i in {1..10}; do
+              if curl -fsS --max-time 10 "$endpoint" >/dev/null 2>&1; then
+                echo "✅ $endpoint is responding"
+                break
+              elif [ $i -eq 10 ]; then
+                echo "❌ $endpoint failed after 10 attempts"
+                echo "Attempting to show response:"
+                curl -v "$endpoint" || true
+                exit 1
+              else
+                echo "Attempt $i failed, retrying..."
+                sleep 3
+              fi
+            done
           done
           
-          echo "❌ Services failed to become healthy within timeout"
-          echo "Checking container status:"
-          make ps || true
-          echo "Gateway logs:"
-          make logs-gw || true
-          exit 1
+          echo "✅ All HTTP endpoints are responding"
 
       - name: Migrate user-service
         run: make migrate
