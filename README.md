@@ -201,12 +201,17 @@ docker compose -f infra/docker-compose.yml logs --tail=50 gateway
 
 #### **Database Management**
 ```bash
-# Apply Symfony migrations
+# Apply Symfony migrations (user-service)
+make migrate
 
----
+# Show migration status
+make status
 
-## 🧪 Testing
+# For advanced DB operations (backups, restores, direct MySQL access), see:
+# CONTRIBUTING.md#database-development
+```
 
+#### **Testing**
 ### **Automated Tests**
 ```bash
 # Run smoke tests (health checks, basic functionality)

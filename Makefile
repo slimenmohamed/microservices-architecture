@@ -1,4 +1,4 @@
-.PHONY: build up down ps logs logs-user logs-notif logs-gw migrate status smoke e2e
+.PHONY: build up down ps logs logs-user logs-notif logs-gw migrate status smoke e2e export-openapi
 
 COMPOSE=cd infra && docker compose
 
@@ -37,3 +37,6 @@ smoke:
 
 e2e:
 	bash scripts/e2e.sh
+
+export-openapi:
+	bash scripts/export-openapi.sh

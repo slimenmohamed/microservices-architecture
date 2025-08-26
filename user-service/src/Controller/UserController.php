@@ -38,8 +38,16 @@ class UserController
     )]
     public function list(): JsonResponse
     {
-        $rows = $this->db->fetchAllAssociative('SELECT id, name, email FROM users ORDER BY id DESC');
-        return new JsonResponse($rows);
+        try {
+            $rows = $this->db->fetchAllAssociative('SELECT id, name, email FROM users ORDER BY id DESC');
+            return new JsonResponse($rows);
+        } catch (\Throwable $e) {
+            // Return JSON error instead of HTML error page to aid diagnostics in CI
+            return new JsonResponse([
+                'error' => 'failed_to_list_users',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     #[Route('/users/{id}', methods: ['GET'])]
