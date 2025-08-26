@@ -17,7 +17,7 @@ This repository demonstrates a **complete microservices architecture** with two 
 - **API Gateway**: Unified entry point with Nginx for request routing and rate limiting
 - **Async Communication**: RabbitMQ message broker for event-driven architecture
 - **Complete CI/CD**: Automated testing and deployment with GitHub Actions
-- **Production Ready**: Health checks, logging, monitoring, and error handling
+- **Production Ready**: Health checks, logging, and error handling
 - **Developer Friendly**: One-command setup, comprehensive testing, and documentation
 
 ### 🔧 **Services Architecture**
@@ -124,33 +124,15 @@ make e2e
 
 ## ✅ Verification
 
-### **Health Check Commands**
 ```bash
 # Quick health verification
 curl http://localhost:8082/health
 
-# Test user creation
-curl -X POST http://localhost:8082/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test User","email":"test@example.com"}'
-
-# View all users
-curl http://localhost:8082/api/users
-```
-
-### **Service Status Verification**
-```bash
-# View container status
+# View container status - all should show "healthy"
 make ps
 
-# Expected output: All services should show "healthy" status
-# - user-service: healthy
-# - notification-service: healthy  
-# - user-db: healthy
-# - notif-db: healthy
-# - rabbitmq: healthy
-# - gateway: running
-# - notification-worker: running
+# Run automated tests
+make smoke && make e2e
 ```
 
 ---
@@ -212,7 +194,6 @@ make status
 ```
 
 #### **Testing**
-### **Automated Tests**
 ```bash
 # Run smoke tests (health checks, basic functionality)
 make smoke
@@ -224,16 +205,7 @@ make e2e
 make export-openapi
 ```
 
-### **Manual Testing**
-```bash
-# Test user endpoints
-curl -X GET http://localhost:8082/api/users
-curl -X POST http://localhost:8082/api/users -H "Content-Type: application/json" -d '{"name":"Test User","email":"test@example.com"}'
-
-# Test notification endpoints  
-curl -X GET http://localhost:8082/api/notifications
-curl -X POST http://localhost:8082/api/notifications -H "Content-Type: application/json" -d '{"subject":"Test","message":"Hello World","recipientId":1}'
-```
+**For detailed API testing examples and manual testing procedures, see [CONTRIBUTING.md#api-testing-and-development](CONTRIBUTING.md#api-testing-and-development)**
 
 ---
 
@@ -419,64 +391,13 @@ This section maps the project brief requirements to their implementation in this
 
 ## Quick Start
 
-Prerequisites: Docker, Docker Compose, make, bash, curl, jq (optional: GNU parallel)
-
-```bash
-# 1) Start the full stack
-make up
-
-# 2) Smoke test via gateway (health, endpoints, docs)
-make smoke
-
-# 3) End-to-end test (creates users, sends a notification, verifies)
-make e2e
-
-# 4) Tail logs if needed
-make logs   # or: make logs-user | logs-notif | logs-gw
-
-# 5) Stop everything and remove volumes
-make down
-```
+This section is already covered above in [🚀 Quick Setup](#-quick-setup) and [✅ Verification](#-verification). Refer there for commands and usage.
 
 ## At a Glance
 
-- __Service URLs__
-  - user-service: http://localhost:8080
-  - notification-service: http://localhost:8081
-  - gateway: http://localhost:8082
-- __Gateway API routes__
-  - /api/users -> user-service
-  - /api/notifications -> notification-service
-- __Docs__
-  - User: http://localhost:8080/docs (gateway: http://localhost:8082/users/docs)
-  - Notification: http://localhost:8081/docs (gateway: http://localhost:8082/notifications/docs)
-  - Raw OpenAPI via gateway: /users/docs.json, /notifications/docs.json
-- __Databases (host)__
-  - user-db: localhost:3307 (internal: user-db:3306)
-  - notif-db: localhost:3308 (internal: notif-db:3306)
-- __Common commands__
-  - make up | make down | make ps | make logs
-  - make smoke | make e2e
+See [Access Services](#4-access-services) and [Developer Commands](#-developer-commands) above for URLs, routes, docs, and common commands.
 
-## Project Structure
 
-```
-/microservices-architecture
-├── user-service
-│   ├── Dockerfile
-│   ├── docker-entrypoint.sh
-│   └── (app files generated during image build)
-├── notification-service
-│   ├── Dockerfile
-│   ├── package.json
-│   └── src/
-├── infra
-│   ├── docker-compose.yml
-│   └── nginx/
-│       └── conf.d/default.conf
-├── Makefile
-└── README.md
-```
 
 ---
 

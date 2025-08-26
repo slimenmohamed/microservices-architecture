@@ -99,10 +99,6 @@ curl http://localhost:8080/health
 
 # Test Notification Service  
 curl http://localhost:8081/health
-
-# Access Swagger Documentation
-open http://localhost:8082/users/docs
-open http://localhost:8082/notifications/docs
 ```
 
 ---
@@ -177,14 +173,9 @@ docker compose -f infra/docker-compose.yml exec -T notif-db mysql -u root -p not
 ```
 
 ### **Service Endpoints**
-| Service | URL | Purpose |
-|---------|-----|----------|
-| **API Gateway** | http://localhost:8082 | Main entry point for all APIs |
-| **User Service** | http://localhost:8080 | Direct access (development only) |
-| **Notification Service** | http://localhost:8081 | Direct access (development only) |
-| **User Database** | localhost:3307 | MySQL (symfony/symfony) |
-| **Notification Database** | localhost:3308 | MySQL (node/node) |
-| **RabbitMQ Management** | http://localhost:15672 | Message broker UI (guest/guest) |
+For URLs and documentation links, see `README.md`:
+- Access points: `README.md` > [Access Services](README.md#4-access-services)
+- Swagger UIs and OpenAPI JSON: `README.md` > [API Documentation](README.md#api-documentation)
 
 ### **API Documentation**
 | Documentation | URL | Description |
