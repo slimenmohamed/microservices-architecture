@@ -75,9 +75,6 @@ jobs:
           sleep 10
 
           cd infra
-          echo "== Doctrine connection check =="
-          docker compose exec -T user-service php bin/console doctrine:database:has --env=prod || true
-
           echo "== Doctrine migration status (before) =="
           docker compose exec -T user-service php bin/console doctrine:migrations:status || true
 

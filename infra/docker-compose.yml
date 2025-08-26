@@ -48,6 +48,7 @@ services:
     environment:
       APP_ENV: prod
       DATABASE_URL: mysql://symfony:symfony@user-db:3306/userdb
+      MESSENGER_TRANSPORT_DSN: sync://
     ports:
       - "8080:8000"
     healthcheck:
