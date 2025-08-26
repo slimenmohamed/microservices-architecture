@@ -43,9 +43,9 @@ else
   fail "List users failed"
 fi
 
-# Docs
-curl -fsS "$GATEWAY/users/docs" >/dev/null && pass "Users Swagger UI ok" || fail "Users docs failed"
-curl -fsS "$GATEWAY/notifications/docs" >/dev/null && pass "Notifications Swagger UI ok" || fail "Notifications docs failed"
+# Docs via gateway (use /api prefixes to route to services)
+curl -fsS "$GATEWAY/api/users/docs" >/dev/null && pass "Users Swagger UI ok" || fail "Users docs failed"
+curl -fsS "$GATEWAY/api/notifications/docs" >/dev/null && pass "Notifications Swagger UI ok" || fail "Notifications docs failed"
 
 # Rate limit sample (expect at least one 429 when flooding)
 if command -v parallel >/dev/null 2>&1; then
