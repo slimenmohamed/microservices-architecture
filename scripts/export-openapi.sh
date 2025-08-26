@@ -10,19 +10,19 @@ mkdir -p "$DOCS_DIR"
 echo "Exporting OpenAPI specs from gateway: $GATEWAY"
 
 # user-service (Symfony via gateway)
-if curl -fsS "$GATEWAY/users/docs.json" -o "$DOCS_DIR/user-service.openapi.json"; then
+if curl -fsS "$GATEWAY/api/users/docs.json" -o "$DOCS_DIR/user-service.openapi.json"; then
   echo "✔ Saved user-service OpenAPI to docs/user-service.openapi.json"
 else
-  echo "! Could not fetch $GATEWAY/users/docs.json" >&2
+  echo "! Could not fetch $GATEWAY/api/users/docs.json" >&2
   echo "  Make sure the user-service docs JSON endpoint is enabled and reachable via the gateway." >&2
   exit 1
 fi
 
 # notification-service (Node via gateway)
-if curl -fsS "$GATEWAY/notifications/docs.json" -o "$DOCS_DIR/notification-service.openapi.json"; then
+if curl -fsS "$GATEWAY/api/notifications/docs.json" -o "$DOCS_DIR/notification-service.openapi.json"; then
   echo "✔ Saved notification-service OpenAPI to docs/notification-service.openapi.json"
 else
-  echo "! Could not fetch $GATEWAY/notifications/docs.json" >&2
+  echo "! Could not fetch $GATEWAY/api/notifications/docs.json" >&2
   exit 1
 fi
 
