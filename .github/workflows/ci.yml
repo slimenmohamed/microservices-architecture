@@ -45,6 +45,11 @@ jobs:
           export GW_BURST=200
           make gw-build-conf
 
+      - name: Show generated gateway config
+        run: |
+          echo '===== infra/nginx/conf.d/default.conf ====='
+          sed -n '1,120p' infra/nginx/conf.d/default.conf
+
       - name: Make up (build and start stack)
         run: make up
 
@@ -59,15 +64,15 @@ jobs:
           
           echo "Testing basic connectivity..."
           # Simple connectivity test without complex health checks
-          for i in {1..20}; do
-            echo "Connectivity test attempt $i/20..."
-            
-            # Test if we can reach the gateway at all
-            if curl -s --max-time 5 http://localhost:8082 >/dev/null 2>&1; then
+          for i in {1..30}; do
+            echo "Connectivity test attempt $i/30 (/health)..."
+
+            # Test if we can reach the gateway health endpoint
+            if curl -s --max-time 5 http://localhost:8082/health >/dev/null 2>&1; then
               echo "✅ Gateway is responding to requests"
               break
-            elif [ $i -eq 20 ]; then
-              echo "❌ Gateway not responding after 20 attempts"
+            elif [ $i -eq 30 ]; then
+              echo "❌ Gateway not responding after 30 attempts"
               echo "Container status:"
               docker compose -f infra/docker-compose.yml ps
               echo "Gateway logs:"
@@ -75,7 +80,7 @@ jobs:
               exit 1
             else
               echo "Gateway not ready, waiting..."
-              sleep 5
+              sleep 3
             fi
           done
 
