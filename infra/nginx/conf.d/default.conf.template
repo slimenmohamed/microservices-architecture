@@ -3,7 +3,7 @@
 # Defaults suitable for CI; override via GW_RATE_LIMIT and GW_BURST
 # Example: GW_RATE_LIMIT=20r/s GW_BURST=40 make up
 # ================================
-limit_req_zone $binary_remote_addr zone=api_rl:10m rate=${GW_RATE_LIMIT:-100r/s};
+limit_req_zone $binary_remote_addr zone=api_rl:10m rate=$GW_RATE_LIMIT;
 
 # ================================
 # Upstreams with least connections
@@ -70,7 +70,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Correlation-Id $http_x_correlation_id;
-        limit_req zone=api_rl burst=${GW_BURST:-200};
+        limit_req zone=api_rl burst=$GW_BURST;
     }
     location = /api/v1/users {
         rewrite ^ /users break;
@@ -80,7 +80,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Correlation-Id $http_x_correlation_id;
-        limit_req zone=api_rl burst=${GW_BURST:-200};
+        limit_req zone=api_rl burst=$GW_BURST;
     }
     # Unversioned
     location /api/users/ {
@@ -91,7 +91,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Correlation-Id $http_x_correlation_id;
-        limit_req zone=api_rl burst=${GW_BURST:-200};
+        limit_req zone=api_rl burst=$GW_BURST;
     }
     location = /api/users {
         rewrite ^ /users break;
@@ -101,7 +101,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Correlation-Id $http_x_correlation_id;
-        limit_req zone=api_rl burst=${GW_BURST:-200};
+        limit_req zone=api_rl burst=$GW_BURST;
     }
 
     # ================================
@@ -116,7 +116,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Correlation-Id $http_x_correlation_id;
-        limit_req zone=api_rl burst=${GW_BURST:-200};
+        limit_req zone=api_rl burst=$GW_BURST;
     }
     location = /api/v1/notifications {
         rewrite ^ /notifications break;
@@ -126,7 +126,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Correlation-Id $http_x_correlation_id;
-        limit_req zone=api_rl burst=${GW_BURST:-200};
+        limit_req zone=api_rl burst=$GW_BURST;
     }
     # Unversioned
     location /api/notifications/ {
@@ -137,7 +137,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Correlation-Id $http_x_correlation_id;
-        limit_req zone=api_rl burst=${GW_BURST:-200};
+        limit_req zone=api_rl burst=$GW_BURST;
     }
     location = /api/notifications {
         rewrite ^ /notifications break;
