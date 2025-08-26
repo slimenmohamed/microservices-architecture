@@ -1,4 +1,6 @@
-# Microservices Architecture (Symfony + Node.js)
+# 🏗️ Microservices Architecture
+
+> **Production-ready microservices architecture demonstrating modern software engineering practices**
 
 ![Docker](https://img.shields.io/badge/Docker-✓-2496ED?logo=docker&logoColor=white)
 ![Compose](https://img.shields.io/badge/Compose-✓-384d54?logo=docker&logoColor=white)
@@ -6,54 +8,154 @@
 ![Node](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
 [![CI](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml/badge.svg)](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml)
 
-## Overview
+## 📋 Overview
 
-This repo contains a minimal microservices setup with two independent services, each with its own database, containerized with Docker and orchestrated via Docker Compose.
+This repository demonstrates a **complete microservices architecture** with two independent services, implementing industry best practices for distributed systems. Each service maintains its own database, ensuring proper service isolation and independence.
 
-Services:
-- user-service: Symfony (PHP) + MySQL
-- notification-service: Node.js (Express) + MySQL
+### 🎯 **Key Features**
+- **Service Independence**: Each service has its own database and can be deployed separately
+- **API Gateway**: Unified entry point with Nginx for request routing and rate limiting
+- **Async Communication**: RabbitMQ message broker for event-driven architecture
+- **Complete CI/CD**: Automated testing and deployment with GitHub Actions
+- **Production Ready**: Health checks, logging, monitoring, and error handling
+- **Developer Friendly**: One-command setup, comprehensive testing, and documentation
 
-No authentication. Minimal models and REST endpoints. No relation between services.
+### 🔧 **Services Architecture**
+| Service | Technology | Database | Purpose |
+|---------|------------|----------|----------|
+| **user-service** | Symfony (PHP 8.2) | MySQL | User management and authentication |
+| **notification-service** | Express (Node.js 20) | MySQL | Notification handling and delivery |
+| **api-gateway** | Nginx | - | Request routing, rate limiting, CORS |
+| **notification-worker** | Node.js | - | Async event processing from RabbitMQ |
 
-## Table of Contents
-- [Overview](#overview)
-- [Project Structure](#project-structure)
-- [Features](#features)
+### ⚡ **Quick Start**
+```bash
+# Start everything with one command
+make up
+
+# Run comprehensive tests
+make smoke && make e2e
+
+# View all services status
+make ps
+```
+
+## 📚 Table of Contents
+
+### 🚀 **Getting Started**
+- [Prerequisites](#prerequisites)
+- [Quick Setup](#quick-setup)
+- [Verification](#verification)
+
+### 🏗️ **Architecture & Design**
+- [System Architecture](#system-architecture)
+- [Service Details](#service-details)
+- [Database Design](#database-design)
+- [Communication Patterns](#communication-patterns)
+
+### 🔧 **Development**
+- [Developer Commands](#developer-commands)
+- [API Documentation](#api-documentation)
+- [Testing Guide](#testing-guide)
+- [Debugging & Monitoring](#debugging--monitoring)
+
+### 📖 **Reference**
 - [Compliance Matrix](#compliance-matrix)
-- [Tech Stack](#tech-stack)
-- [Quick Start](#quick-start)
-- [At a Glance](#at-a-glance)
-- [Architecture](#architecture-high-level)
-- [Getting Started](#getting-started)
-- [API Endpoints](#api-endpoints)
-- [Gateway](#gateway)
-- [Example Workflow](#example-workflow)
-- [Docs & Tooling](#docs--tooling)
-- [Quick Tests](#quick-tests)
-- [Cleanup](#cleanup)
-- [Deep Dive: Architecture and Usage](#deep-dive-architecture-and-usage)
-- [How to add a new service](#how-to-add-a-new-service)
 - [Troubleshooting](#troubleshooting)
-- [Development tips](#development-tips)
 - [Contributing](#contributing)
+- [Project Structure](#project-structure)
 
-## Features
-- Service-per-database isolation
-- Dockerized services orchestrated with Docker Compose
-- Health and readiness endpoints with Compose healthchecks
-- OpenAPI/Swagger UI per service
-- Nginx API Gateway for a single entry point
-- Inter-service communication with correlation IDs
-- Database migrations (Symfony) and startup schema/index ensure (Node)
-- Input validation (Symfony Validator, express-validator)
-- Centralized error handling and graceful shutdown (notification-service)
-- Gateway rate limiting (limit_req) to mitigate bursts/abuse
+---
 
-## Tech Stack
-- user-service: Symfony (PHP 8), Doctrine DBAL, Doctrine Migrations, Symfony Validator, NelmioApiDocBundle, MySQL
-- notification-service: Node.js (Express), express-validator, swagger-jsdoc, swagger-ui-express, uuid, MySQL
-- infra: Docker, Docker Compose, Nginx (hardened with timeouts and rate limiting)
+## 📋 Prerequisites
+
+### **System Requirements**
+- **Docker**: Version 20.10+ ([Install Docker](https://docs.docker.com/get-docker/))
+- **Docker Compose**: Version 2.0+ (included with Docker Desktop)
+- **Make**: GNU Make for command shortcuts
+- **Git**: For version control
+
+### **Optional Tools**
+- **curl**: For API testing (usually pre-installed)
+- **jq**: For JSON processing in scripts
+- **GNU parallel**: For advanced rate limiting tests
+
+### **Port Requirements**
+Ensure these ports are available on your system:
+- `8080`: User service direct access
+- `8081`: Notification service direct access  
+- `8082`: API Gateway (main entry point)
+- `3307`: User database (MySQL)
+- `3308`: Notification database (MySQL)
+- `5672`: RabbitMQ AMQP
+- `15672`: RabbitMQ Management UI
+
+---
+
+## 🚀 Quick Setup
+
+### **1. Clone & Navigate**
+```bash
+git clone https://github.com/slimenmohamed/microservices-architecture.git
+cd microservices-architecture
+```
+
+### **2. Start All Services**
+```bash
+# Build and start everything (databases, services, gateway, message broker)
+make up
+```
+
+### **3. Verify Installation**
+```bash
+# Check all services are healthy
+make ps
+
+# Run health checks
+make smoke
+
+# Test end-to-end workflow
+make e2e
+```
+
+### **4. Access Services**
+- **🌐 API Gateway**: http://localhost:8082 *(recommended entry point)*
+- **👥 User Service**: http://localhost:8080/docs *(Swagger UI)*
+- **📧 Notification Service**: http://localhost:8081/docs *(Swagger UI)*
+- **🐰 RabbitMQ Management**: http://localhost:15672 *(guest/guest)*
+
+---
+
+## ✅ Verification
+
+### **Health Check Commands**
+```bash
+# Quick health verification
+curl http://localhost:8082/health
+
+# Test user creation
+curl -X POST http://localhost:8082/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com"}'
+
+# View all users
+curl http://localhost:8082/api/users
+```
+
+### **Service Status Verification**
+```bash
+# View container status
+make ps
+
+# Expected output: All services should show "healthy" status
+# - user-service: healthy
+# - notification-service: healthy  
+# - user-db: healthy
+# - notif-db: healthy
+# - rabbitmq: healthy
+# - gateway: running
+# - notification-worker: running
+```
 
 ## Compliance Matrix
 
@@ -163,21 +265,77 @@ make down
 └── README.md
 ```
 
-## Architecture (high level)
+---
+
+## 🏗️ System Architecture
+
+### **High-Level Overview**
 
 ```mermaid
-flowchart LR
-    C[Clients]
-    C --> G[API Gateway (Nginx)]
-    G -->|/api/users| U[user-service (Symfony)]
-    G -->|/api/notifications| N[notification-service (Express)]
-    U --> UD[(user-db MySQL)]
-    N --> ND[(notif-db MySQL)]
-    N -->|publish events| MQ[RabbitMQ]
-    MQ -->|consume| W[notification-worker]
+flowchart TB
+    subgraph "External"
+        C["🌐 Clients<br/>(Web, Mobile, API)"]
+    end
+    
+    subgraph "API Layer"
+        G["🚪 API Gateway<br/>(Nginx)<br/>Port: 8082"]
+    end
+    
+    subgraph "Services"
+        U["👥 User Service<br/>(Symfony/PHP)<br/>Port: 8080"]
+        N["📧 Notification Service<br/>(Express/Node.js)<br/>Port: 8081"]
+        W["⚙️ Notification Worker<br/>(Node.js)"]
+    end
+    
+    subgraph "Data Layer"
+        UD[("🗄️ User DB<br/>(MySQL)<br/>Port: 3307")]
+        ND[("🗄️ Notification DB<br/>(MySQL)<br/>Port: 3308")]
+    end
+    
+    subgraph "Message Broker"
+        MQ["🐰 RabbitMQ<br/>Port: 5672<br/>Management: 15672"]
+    end
+    
+    C --> G
+    G -->|/api/users/*| U
+    G -->|/api/notifications/*| N
+    U --> UD
+    N --> ND
+    N -.->|publish events| MQ
+    MQ -.->|consume events| W
+    
+    classDef service fill:#e1f5fe
+    classDef database fill:#f3e5f5
+    classDef gateway fill:#e8f5e8
+    classDef message fill:#fff3e0
+    
+    class U,N,W service
+    class UD,ND database
+    class G gateway
+    class MQ message
 ```
 
-Static diagram (for hosts without Mermaid): see `docs/architecture.svg`.
+> 📄 **Static diagram available**: `docs/architecture.svg` for environments without Mermaid support
+
+### **Architecture Principles**
+
+#### 🔒 **Service Independence**
+- Each service owns its data (service-per-database pattern)
+- Services communicate only through well-defined APIs
+- No direct database access between services
+- Independent deployment and scaling capabilities
+
+#### 🌐 **API Gateway Pattern**
+- Single entry point for all client requests
+- Request routing based on URL patterns
+- Cross-cutting concerns (rate limiting, CORS, logging)
+- Service discovery and load balancing
+
+#### 📨 **Event-Driven Communication**
+- Synchronous: REST APIs for immediate responses
+- Asynchronous: RabbitMQ for event notifications
+- Loose coupling between services
+- Resilient to service failures
 
 ```
                  +---------------------+
@@ -331,7 +489,7 @@ curl -s http://localhost:8082/api/notifications/$NOTIF_ID | jq .
 - Export OpenAPI specs to `docs/` via the gateway:
 
 ```bash
-bash scripts/export-openapi.sh
+make export-openapi
 # Outputs:
 # docs/user-service.openapi.json
 # docs/notification-service.openapi.json
