@@ -50,24 +50,16 @@ make ps
 ### 🏗️ **Architecture & Design**
 - [System Architecture](#system-architecture)
 - [Service Details](#service-details)
-- [Database Design](#database-design)
-- [Communication Patterns](#communication-patterns)
+- [API Documentation](#api-documentation)
 
 ### 🔧 **Development**
-- [Developer Commands](#developer-commands)
-- [Complete Command Reference](#complete-command-reference)
-- [Database Operations](#database-operations)
-- [API Documentation](#api-documentation)
-- [Testing Guide](#testing-guide)
-- [Debugging & Monitoring](#debugging--monitoring)
-- [Advanced Operations](#advanced-operations)
-- [Performance Monitoring](#performance-monitoring)
+- [Basic Commands](#basic-commands)
+- [Testing](#testing)
+- [Contributing](#contributing)
 
 ### 📖 **Reference**
-- [Compliance Matrix](#compliance-matrix)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
 - [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -210,326 +202,95 @@ docker compose -f infra/docker-compose.yml logs --tail=50 gateway
 #### **Database Management**
 ```bash
 # Apply Symfony migrations
-make migrate
-# Equivalent to: cd infra && docker compose exec user-service php bin/console doctrine:migrations:migrate --no-interaction
 
-# Check migration status
-make status
-# Equivalent to: cd infra && docker compose exec user-service php bin/console doctrine:migrations:status
-```
+---
 
-#### **Testing Commands**
+## 🧪 Testing
+
+### **Automated Tests**
 ```bash
 # Run smoke tests (health checks, basic functionality)
 make smoke
-# Equivalent to: bash scripts/smoke.sh
 
 # Run end-to-end tests (complete workflow)
 make e2e
-# Equivalent to: bash scripts/e2e.sh
 
-# Export OpenAPI specifications
+# Export OpenAPI documentation
 make export-openapi
-# Equivalent to: bash scripts/export-openapi.sh
+```
+
+### **Manual Testing**
+```bash
+# Test user endpoints
+curl -X GET http://localhost:8082/api/users
+curl -X POST http://localhost:8082/api/users -H "Content-Type: application/json" -d '{"name":"Test User","email":"test@example.com"}'
+
+# Test notification endpoints  
+curl -X GET http://localhost:8082/api/notifications
+curl -X POST http://localhost:8082/api/notifications -H "Content-Type: application/json" -d '{"subject":"Test","message":"Hello World","recipientId":1}'
 ```
 
 ---
 
-## 📚 Complete Command Reference
+## 🤝 Contributing
 
-### **Direct Docker Compose Commands**
+We welcome contributions! This project follows modern development practices and has comprehensive tooling to support contributors.
 
-#### **Service Management**
+**📖 For detailed development instructions, complete command references, coding guidelines, and troubleshooting, see [CONTRIBUTING.md](CONTRIBUTING.md)**
+
+### **Quick Contribution Workflow**
 ```bash
-# Start specific services
-docker compose -f infra/docker-compose.yml up user-service
-docker compose -f infra/docker-compose.yml up notification-service
-docker compose -f infra/docker-compose.yml up gateway
+# 1. Fork and clone the repository
+git clone https://github.com/your-username/microservices-architecture.git
+cd microservices-architecture
 
-# Stop specific services
-docker compose -f infra/docker-compose.yml stop user-service
-docker compose -f infra/docker-compose.yml stop notification-service
+# 2. Start development environment
+make up
 
-# Restart specific services
-docker compose -f infra/docker-compose.yml restart user-service
-docker compose -f infra/docker-compose.yml restart notification-service
+# 3. Make your changes and test
+make smoke && make e2e
 
-# Remove specific services
-docker compose -f infra/docker-compose.yml rm user-service
-docker compose -f infra/docker-compose.yml rm notification-service
+# 4. Submit pull request
+git add . && git commit -m "feat: your feature description"
+git push origin your-branch
 ```
 
-#### **Image Management**
-```bash
-# Build specific service images
-docker compose -f infra/docker-compose.yml build user-service
-docker compose -f infra/docker-compose.yml build notification-service
-docker compose -f infra/docker-compose.yml build notification-worker
+---
 
-# Build without cache
-docker compose -f infra/docker-compose.yml build --no-cache user-service
-docker compose -f infra/docker-compose.yml build --no-cache notification-service
+## 📖 Project Structure
 
-# Pull latest base images
-docker compose -f infra/docker-compose.yml pull
+```
+microservices-architecture/
+├── user-service/              # Symfony PHP service
+│   ├── src/Controller/        # API controllers
+│   ├── src/Entity/           # Doctrine entities
+│   └── migrations/           # Database migrations
+├── notification-service/      # Node.js Express service
+│   ├── src/controllers/      # API controllers
+│   ├── src/models/          # Database models
+│   └── src/workers/         # Background workers
+├── infra/                    # Infrastructure setup
+│   ├── docker-compose.yml   # Service orchestration
+│   └── nginx/               # API gateway config
+├── scripts/                  # Automation scripts
+└── docs/                    # Additional documentation
 ```
 
-#### **Container Inspection**
-```bash
-# Show detailed container information
-docker compose -f infra/docker-compose.yml ps -a
-docker compose -f infra/docker-compose.yml ps --services
-docker compose -f infra/docker-compose.yml ps --filter "status=running"
+---
 
-# Show container resource usage
-docker compose -f infra/docker-compose.yml top
+## 🔍 Troubleshooting
 
-# Show container configuration
-docker compose -f infra/docker-compose.yml config
-docker compose -f infra/docker-compose.yml config --services
-```
+### **Common Issues**
+- **Port conflicts**: Ensure ports 8080-8082, 3307-3308, 5672, 15672 are available
+- **Docker issues**: Try `docker system prune -f` and restart Docker
+- **Database connection**: Check if databases are running with `make ps`
+- **Service startup**: Wait for health checks to pass before testing APIs
 
-### **Container Execution Commands**
-
-#### **User Service (Symfony/PHP)**
-```bash
-# Execute commands in user-service container
-docker compose -f infra/docker-compose.yml exec user-service bash
-
-# Symfony console commands
-docker compose -f infra/docker-compose.yml exec user-service php bin/console list
-docker compose -f infra/docker-compose.yml exec user-service php bin/console debug:router
-docker compose -f infra/docker-compose.yml exec user-service php bin/console debug:container
-
-# Database operations
-docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:database:create
-docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:database:drop --force
-docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:schema:validate
-
-# Migration operations
-docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:migrations:list
-docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:migrations:generate
-docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:migrations:execute --up VERSION
-docker compose -f infra/docker-compose.yml exec user-service php bin/console doctrine:migrations:execute --down VERSION
-
-# Cache operations
-docker compose -f infra/docker-compose.yml exec user-service php bin/console cache:clear
-docker compose -f infra/docker-compose.yml exec user-service php bin/console cache:warmup
-
-# Composer operations
-docker compose -f infra/docker-compose.yml exec user-service composer install
-docker compose -f infra/docker-compose.yml exec user-service composer update
-docker compose -f infra/docker-compose.yml exec user-service composer dump-autoload
-```
-
-#### **Notification Service (Node.js/Express)**
-```bash
-# Execute commands in notification-service container
-docker compose -f infra/docker-compose.yml exec notification-service bash
-
-# Node.js operations
-docker compose -f infra/docker-compose.yml exec notification-service node --version
-docker compose -f infra/docker-compose.yml exec notification-service npm --version
-
-# NPM operations
-docker compose -f infra/docker-compose.yml exec notification-service npm install
-docker compose -f infra/docker-compose.yml exec notification-service npm update
-docker compose -f infra/docker-compose.yml exec notification-service npm audit
-docker compose -f infra/docker-compose.yml exec notification-service npm audit fix
-
-# Application operations
-docker compose -f infra/docker-compose.yml exec notification-service npm start
-docker compose -f infra/docker-compose.yml exec notification-service npm run dev
-docker compose -f infra/docker-compose.yml exec notification-service npm test
-```
-
-### **Database Operations**
-
-#### **User Database (MySQL)**
-```bash
-# Connect to user database
-mysql -h localhost -P 3307 -u symfony -p userdb
-# Password: symfony
-
-# Database operations via Docker
-docker compose -f infra/docker-compose.yml exec user-db mysql -u root -p userdb
-# Password: root
-
-# Backup user database
-docker compose -f infra/docker-compose.yml exec user-db mysqldump -u root -p userdb > user_backup.sql
-
-# Restore user database
-docker compose -f infra/docker-compose.yml exec -T user-db mysql -u root -p userdb < user_backup.sql
-
-# Show user database tables
-docker compose -f infra/docker-compose.yml exec user-db mysql -u root -p -e "USE userdb; SHOW TABLES;"
-
-# Show user database structure
-docker compose -f infra/docker-compose.yml exec user-db mysql -u root -p -e "USE userdb; DESCRIBE users;"
-```
-
-#### **Notification Database (MySQL)**
-```bash
-# Connect to notification database
-mysql -h localhost -P 3308 -u node -p notifdb
-# Password: node
-
-# Database operations via Docker
-docker compose -f infra/docker-compose.yml exec notif-db mysql -u root -p notifdb
-# Password: root
-
-# Backup notification database
-docker compose -f infra/docker-compose.yml exec notif-db mysqldump -u root -p notifdb > notif_backup.sql
-
-# Restore notification database
-docker compose -f infra/docker-compose.yml exec -T notif-db mysql -u root -p notifdb < notif_backup.sql
-
-# Show notification database tables
-docker compose -f infra/docker-compose.yml exec notif-db mysql -u root -p -e "USE notifdb; SHOW TABLES;"
-
-# Show notification database structure
-docker compose -f infra/docker-compose.yml exec notif-db mysql -u root -p -e "USE notifdb; DESCRIBE notifications;"
-```
-
-### **RabbitMQ Operations**
-
-#### **Management Commands**
-```bash
-# Access RabbitMQ container
-docker compose -f infra/docker-compose.yml exec rabbitmq bash
-
-# RabbitMQ management commands
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl status
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_queues
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_exchanges
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_bindings
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_connections
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_channels
-
-# Queue management
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl purge_queue notification_queue
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl delete_queue notification_queue
-
-# User management
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_users
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl add_user newuser password
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl set_user_tags newuser administrator
-```
-
-#### **Message Publishing (Testing)**
-```bash
-# Publish test message to exchange
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqadmin publish exchange=notifications routing_key=created payload="{\"test\":\"message\"}"
-
-# Get messages from queue
-docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqadmin get queue=notification_queue
-```
-
-### **API Testing Commands**
-
-#### **Health Check Endpoints**
-```bash
-# Test all health endpoints
-curl -i http://localhost:8082/health          # Gateway health
-curl -i http://localhost:8080/health          # User service health
-curl -i http://localhost:8081/health          # Notification service health
-
-# Test readiness endpoints
-curl -i http://localhost:8080/ready           # User service readiness
-curl -i http://localhost:8081/ready           # Notification service readiness
-```
-
-#### **User Service API Testing**
-```bash
-# List all users
-curl -X GET http://localhost:8082/api/users
-curl -X GET http://localhost:8080/users       # Direct access
-
-# Create a new user
-curl -X POST http://localhost:8082/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John Doe","email":"john@example.com"}'
-
-# Get specific user
-curl -X GET http://localhost:8082/api/users/1
-
-# Update user
-curl -X PUT http://localhost:8082/api/users/1 \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John Smith","email":"johnsmith@example.com"}'
-
-# Delete user
-curl -X DELETE http://localhost:8082/api/users/1
-
-# Send notification via user service
-curl -X POST http://localhost:8082/api/users/2/notify \
-  -H "Content-Type: application/json" \
-  -d '{"subject":"Hello","message":"Test notification"}'
-```
-
-#### **Notification Service API Testing**
-```bash
-# List all notifications
-curl -X GET http://localhost:8082/api/notifications
-curl -X GET http://localhost:8081/notifications    # Direct access
-
-# Create notification
-curl -X POST http://localhost:8082/api/notifications \
-  -H "Content-Type: application/json" \
-  -d '{"subject":"Test","message":"Hello World","recipientId":1}'
-
-# Get specific notification
-curl -X GET http://localhost:8082/api/notifications/1
-
-# Update notification
-curl -X PUT http://localhost:8082/api/notifications/1 \
-  -H "Content-Type: application/json" \
-  -d '{"subject":"Updated","message":"Updated message"}'
-
-# Delete notification
-curl -X DELETE http://localhost:8082/api/notifications/1
-```
-
-#### **Advanced API Testing**
-```bash
-# Test with correlation ID
-curl -X GET http://localhost:8082/api/users \
-  -H "X-Correlation-Id: test-12345"
-
-# Test rate limiting
-for i in {1..15}; do curl -s http://localhost:8082/api/users; done
-
-# Test CORS
-curl -X OPTIONS http://localhost:8082/api/users \
-  -H "Origin: http://localhost:3000" \
-  -H "Access-Control-Request-Method: GET" \
-  -H "Access-Control-Request-Headers: Content-Type"
-
-# Test error handling
-curl -X POST http://localhost:8082/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"invalid":"data"}'
-```
-
-### **Performance Monitoring**
-
-#### **Resource Usage**
-```bash
-# Monitor container resource usage
-docker stats
-docker stats --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
-
-# Monitor specific containers
-docker stats user-service notification-service api-gateway
-
-# Memory usage by service
-docker compose -f infra/docker-compose.yml exec user-service free -h
-docker compose -f infra/docker-compose.yml exec notification-service free -h
-
-# Disk usage
-docker system df
-docker system df -v
-```
+### **Getting Help**
+- Check service logs: `make logs`
+- Verify service health: `curl http://localhost:8082/health`
+- Review [CONTRIBUTING.md](CONTRIBUTING.md) for detailed troubleshooting
+- Open an issue on GitHub for persistent problems
 
 #### **Network Monitoring**
 ```bash
@@ -847,20 +608,20 @@ MySQL instances:
 - user-db: localhost:3307 (inside compose: user-db:3306)
 - notif-db: localhost:3308 (inside compose: notif-db:3306)
 
-## Developer commands (Makefile)
+## Basic Commands (Makefile)
 
-From repo root, convenient shortcuts:
+From the repo root, the most common shortcuts are:
 
 ```bash
-make up         # build + start everything in background
-make ps         # show services
-make logs       # tail all logs (or: make logs-user | logs-notif | logs-gw)
-make migrate    # run Symfony Doctrine migrations
-make status     # show migration status
-make smoke      # run smoke test (gateway, endpoints, docs)
-make e2e        # run end-to-end notification test
-make down       # stop and remove containers + volumes
+make up       # build + start everything
+make down     # stop and remove containers + volumes
+make ps       # show services
+make logs     # tail all logs (use: logs-user | logs-notif | logs-gw)
+make smoke    # quick health + basic checks
+make e2e      # full end-to-end workflow test
 ```
+
+For the complete command reference (databases, RabbitMQ, Docker Compose, advanced ops), see CONTRIBUTING.md.
 
 ## API Endpoints
 
@@ -904,30 +665,7 @@ make down       # stop and remove containers + volumes
 
 ## Example Workflow
 
-Run through the gateway at http://localhost:8082 once services are up.
-
-```bash
-# 1) Create two users (unique emails recommended) and capture IDs
-ALICE_ID=$(curl -s -H 'Content-Type: application/json' \
-  -d '{"name":"Alice","email":"alice-'"$(date +%s)""@example.com"}' \
-  http://localhost:8082/api/users | jq -r '.id')
-
-BOB_ID=$(curl -s -H 'Content-Type: application/json' \
-  -d '{"name":"Bob","email":"bob-'"$(date +%s)""@example.com"}' \
-  http://localhost:8082/api/users | jq -r '.id')
-
-echo "Alice=$ALICE_ID, Bob=$BOB_ID"
-
-# 2) Send a notification to Bob via user-service endpoint and capture notif ID
-NOTIF_ID=$(curl -s -X POST -H 'Content-Type: application/json' \
-  -d '{"subject":"Hello","message":"Hi from Alice"}' \
-  http://localhost:8082/api/users/$BOB_ID/notify | jq -r '.id')
-
-echo "Notification id=$NOTIF_ID"
-
-# 3) Verify notification payload
-curl -s http://localhost:8082/api/notifications/$NOTIF_ID | jq .
-```
+A concise example flow is provided in CONTRIBUTING.md (API Testing and Development). It includes ready-to-run curl snippets for creating users, sending a notification, and verifying results through the gateway.
 
 ## Docs & Tooling
 - Swagger UI exposed per service.
@@ -1010,52 +748,11 @@ Notes:
 
 ## Quick Tests
 
-Run these from your host once services are up:
-
-```bash
-# user-service (direct)
-curl -s http://localhost:8080/users                 # list
-curl -s -X POST -H 'Content-Type: application/json' \
-  -d '{"name":"Alice","email":"alice@example.com"}' \
-  http://localhost:8080/users
-curl -s http://localhost:8080/users/1               # get by id
-curl -s -X PUT -H 'Content-Type: application/json' \
-  -d '{"name":"Alice Updated","email":"alice@example.com"}' \
-  http://localhost:8080/users/1
-curl -i -s -X DELETE http://localhost:8080/users/1  # delete
-
-# notification-service (direct)
-curl -s http://localhost:8081/notifications
-curl -s -X POST -H 'Content-Type: application/json' \
-  -d '{"subject":"Greetings","message":"hello"}' \
-  http://localhost:8081/notifications
-curl -s -X POST -H 'Content-Type: application/json' \
-  -d '{"subject":"Greetings","message":"hello","recipientId":1}' \
-  http://localhost:8081/notifications
-
-# via gateway
-curl -s http://localhost:8082/api/users
-curl -s http://localhost:8082/api/notifications
-
-# docs
-echo "User docs:           http://localhost:8080/docs (or gateway: http://localhost:8082/users/docs)"
-echo "Notification docs:   http://localhost:8081/docs (or gateway: http://localhost:8082/notifications/docs)"
-```
-
-Or use the Makefile shortcuts once services are up:
-
-```bash
-make smoke   # basic health, endpoints, docs
-make e2e     # creates users, sends a notification, verifies it
-```
+See CONTRIBUTING.md (API Testing and Development) for ready-to-run curl snippets and Makefile shortcuts covering health checks, CRUD operations, and the end-to-end notification flow via the gateway.
 
 ## Cleanup
 
-```bash
-docker compose down -v
-```
-
-This removes containers, networks, and volumes.
+To remove containers, networks, and volumes: see the Maintenance section in CONTRIBUTING.md (includes safe cleanup and pruning commands).
 
 ---
 
