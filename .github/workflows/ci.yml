@@ -34,6 +34,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Install templating dependencies (envsubst)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext-base
+
       - name: Build gateway config (CI limits)
         run: |
           export GW_RATE_LIMIT=100r/s
