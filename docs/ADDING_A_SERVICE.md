@@ -163,54 +163,57 @@ The Compose healthcheck should probe `/ready`.
 
 ## 5) Gateway Routes (infra/nginx/conf.d/default.conf)
 
-Add versioned and unversioned routes, plus optional docs pass-through.
+Add versioned and unversioned routes, plus optional docs pass-through. Use explicit prefix and exact match locations (not broad regex) to avoid unintended 301 redirects. Preserve the client host:port with `$http_host`.
 
 ```nginx
-# Upstreams (top of file, if not already present)
-upstream reporting_backend { zone reporting_zone 64k; least_conn; server reporting-service:3002 resolve; }
+# Upstreams (top of file)
+upstream reporting_backend {
+    least_conn;
+    server reporting-service:3002 max_fails=3 fail_timeout=30s;
+}
 
 # Inside the server { ... }
-# v1 (versioned)
+# Versioned
 location /api/v1/reporting/ {
     rewrite ^/api/v1/reporting/(.*)$ /reporting/$1 break;
     proxy_pass http://reporting_backend;
-    proxy_set_header Host $host;
+    proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Correlation-Id $http_x_correlation_id;
-    limit_req zone=api_rl burst=20 nodelay;
+    limit_req zone=api_rl burst=200;
 }
 location = /api/v1/reporting {
     rewrite ^ /reporting break;
     proxy_pass http://reporting_backend;
-    proxy_set_header Host $host;
+    proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Correlation-Id $http_x_correlation_id;
-    limit_req zone=api_rl burst=20 nodelay;
+    limit_req zone=api_rl burst=200;
 }
 # Unversioned
 location /api/reporting/ {
     rewrite ^/api/reporting/(.*)$ /reporting/$1 break;
     proxy_pass http://reporting_backend;
-    proxy_set_header Host $host;
+    proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Correlation-Id $http_x_correlation_id;
-    limit_req zone=api_rl burst=20 nodelay;
+    limit_req zone=api_rl burst=200;
 }
 location = /api/reporting {
     rewrite ^ /reporting break;
     proxy_pass http://reporting_backend;
-    proxy_set_header Host $host;
+    proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Correlation-Id $http_x_correlation_id;
-    limit_req zone=api_rl burst=20 nodelay;
+    limit_req zone=api_rl burst=200;
 }
 
 # Optional: docs pass-through if your service exposes Swagger UI at /docs
@@ -219,11 +222,15 @@ location = /api/reporting {
 
 Remember to reload/restart the gateway container after updating config:
 ```bash
-make restart-gw
 make gw-config-test  # validate config inside the container
+make restart-gw
 ```
 
 > Important: Always run `make gw-config-test` before restart to validate Nginx syntax.
+
+Rate limiting guidance:
+- For CI: configure `limit_req_zone` around 100r/s and `burst` 200 to avoid noisy 503s during parallel tests.
+- For production: tune lower based on traffic patterns and SLOs, and consider separate zones per API group if needed.
 
 ---
 

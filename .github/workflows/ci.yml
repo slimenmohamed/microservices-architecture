@@ -68,6 +68,9 @@ jobs:
             fi
           done
 
+      - name: Gateway config test
+        run: make gw-config-test
+
       - name: Run and verify user-service migrations
         run: |
           set -e
