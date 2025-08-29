@@ -13,8 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx (with retry)
+        uses: Wandalen/wretry.action@v1.3.0
+        with:
+          action: docker/setup-buildx-action@v3
+          attempt_limit: 3
+          attempt_delay: 20000 # ms
 
       - name: Warm cache (user-service)
         uses: docker/build-push-action@v5
@@ -182,9 +186,13 @@ jobs:
         if: ${{ env.CR_PAT != '' }}
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker Buildx (with retry)
         if: ${{ env.CR_PAT != '' }}
-        uses: docker/setup-buildx-action@v3
+        uses: Wandalen/wretry.action@v1.3.0
+        with:
+          action: docker/setup-buildx-action@v3
+          attempt_limit: 3
+          attempt_delay: 20000 # ms
 
       - name: Login to GHCR
         if: ${{ env.CR_PAT != '' }}
