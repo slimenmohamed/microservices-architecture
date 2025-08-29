@@ -8,7 +8,7 @@
 ![Node](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
 [![CI](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml/badge.svg)](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml)
 [• smoke script](scripts/smoke.sh) · [• e2e script](scripts/e2e.sh)
-
+[• Testing Guide](docs/testing-guide.md) · [• Adding a Service](docs/ADDING_A_SERVICE.md) · [• Contributing](CONTRIBUTING.md)
 [![OpenAPI Users](https://img.shields.io/badge/OpenAPI-Users-0366d6)](docs/user-service.openapi.json)
 [![OpenAPI Notifications](https://img.shields.io/badge/OpenAPI-Notifications-0366d6)](docs/notification-service.openapi.json)
 

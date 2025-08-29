@@ -4,6 +4,10 @@ This folder contains API specifications and client tooling for the microservices
 
 For the full project overview and setup instructions, see the root [README.md](../README.md).
 
+## Guides
+- Complete Testing Guide: [testing-guide.md](testing-guide.md)
+- Adding a Microservice: [ADDING_A_SERVICE.md](ADDING_A_SERVICE.md)
+
 ## OpenAPI Specifications
 - User Service: `user-service.openapi.json`
 - Notification Service: `notification-service.openapi.json`
