@@ -7,12 +7,36 @@
 ![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white)
 ![Node](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
 [![CI](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml/badge.svg)](https://github.com/slimenmohamed/microservices-architecture/actions/workflows/ci.yml)
-[• smoke script](scripts/smoke.sh) · [• e2e script](scripts/e2e.sh)
-[• Testing Guide](docs/testing-guide.md) · [• Adding a Service](docs/ADDING_A_SERVICE.md) · [• Contributing](CONTRIBUTING.md)
-[![OpenAPI Users](https://img.shields.io/badge/OpenAPI-Users-0366d6)](docs/user-service.openapi.json)
-[![OpenAPI Notifications](https://img.shields.io/badge/OpenAPI-Notifications-0366d6)](docs/notification-service.openapi.json)
+
+📜 **Scripts & Docs**
+- [Smoke script](scripts/smoke.sh) · [E2E script](scripts/e2e.sh)
+- [Testing Guide](docs/testing-guide.md) · [Adding a Service](docs/ADDING_A_SERVICE.md) · [Contributing](CONTRIBUTING.md)
+
+📖 **OpenAPI**
+- [Users](docs/user-service.openapi.json)
+- [Notifications](docs/notification-service.openapi.json)
 
 ---
+
+## 📑 Table of Contents
+
+- [🌐 Environment-based Gateway Limits](#environment-based-gateway-limits)
+- [🧰 Tech Stack](#tech-stack)
+- [📋 Overview](#overview)
+- [🎯 Key Features](#key-features)
+- [✅ Prerequisites](#prerequisites)
+- [🚀 Quick Setup](#quick-setup)
+- [🔧 Basic Commands](#basic-commands)
+- [📖 Project Structure](#project-structure)
+- [🏗️ Architecture](#architecture)
+- [🧠 Design Decisions](#design-decisions)
+- [🔢 API Versioning](#api-versioning)
+- [📚 API Docs & Postman](#api-docs--postman)
+- [🩺 Health & Readiness](#health--readiness)
+- [🔎 Observability & Limits](#observability--limits)
+- [🛠️ Troubleshooting (Quick)](#️troubleshooting-quick)
+- [⚠️ Common Errors & Fixes](#️common-errors--fixes)
+- [🤝 Contributing](#contributing)
 
 ## 🌐 Environment-based Gateway Limits
 
