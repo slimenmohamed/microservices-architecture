@@ -403,6 +403,32 @@ Optional: watch worker logs during scenario (Ctrl-C to exit)
 docker compose -f infra/docker-compose.yml logs -f notification-worker
 ```
 
+## Additional Notes and Expectations
+
+- __Log exit cheatsheet__
+  - `make logs*` or `docker compose logs -f` will follow logs. Press Ctrl-C to exit without stopping containers.
+  - To print recent lines without following: add `--tail=200` and omit `-f`.
+- __HTTP status expectations__
+  - Successful GET/POST: 200/201
+  - Delete: 204 No Content (or 200, depending on endpoint)
+  - Not found: 404
+  - Validation error: 400
+  - Rate limited: 429 (when limits are low and you flood the gateway)
+- __Gateway vs direct service__
+  - Prefer gateway URLs for all client testing.
+  - Use direct service ports (8080/8081) only for debugging readiness/health.
+- __OpenAPI & Swagger UI__
+  - Swagger UIs are always via gateway: `/api/users/docs`, `/api/notifications/docs`.
+  - Export JSON specs anytime with `make export-openapi`.
+- __CI (GitHub Actions) artifacts__
+  - OpenAPI bundle: artifact `openapi-specs` contains `docs/*.openapi.json` produced during CI run.
+  - Postman run report: artifact `postman-newman-report` contains `newman-report.json`.
+- __RabbitMQ visibility__
+  - UI at http://localhost:15672 (guest/guest).
+  - CLI: `docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_queues`.
+- __Correlation ID__
+  - Send `X-Correlation-Id: <uuid>` header to gateway; search the value in logs to trace a request end-to-end.
+
 ---
 
 ## Troubleshooting Quick Reference

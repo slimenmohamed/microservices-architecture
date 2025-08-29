@@ -204,46 +204,6 @@ Key principles:
 
 ![Communication](docs/communication.svg)
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant C as Client
-    participant GW as API Gateway (Nginx)
-    participant US as User Service (Symfony)
-    participant MQ as RabbitMQ
-    participant NW as Notification Worker (Node.js)
-    participant NS as Notification Service (Express)
-    participant NDB as Notifications DB (MySQL)
-
-    Note over C,GW: Synchronous REST via Gateway
-
-    C->>GW: POST /api/v1/users (create user)
-    GW->>US: POST /users (proxy)
-    US-->>GW: 201 Created + User
-    GW-->>C: 201 Created + User
-
-    Note over US,MQ: Asynchronous event publication
-
-    US-->>MQ: publish "user.created" event
-
-    Note over MQ,NW: Worker consumes events
-
-    MQ-->>NW: user.created
-    NW->>NS: POST /notifications (create message)
-    NS->>NDB: INSERT notification
-    NDB-->>NS: OK
-    NS-->>NW: 201 Created
-
-    Note over C,GW: Client fetches notifications later
-
-    C->>GW: GET /api/v1/notifications?userId=...
-    GW->>NS: GET /notifications?userId=...
-    NS->>NDB: SELECT notifications
-    NDB-->>NS: Rows
-    NS-->>GW: 200 OK + List
-    GW-->>C: 200 OK + List
-```
-
 To generate SVGs: `make render-diagrams` → outputs `docs/communication.svg` and `docs/architecture.svg`. See also `docs/communication.mmd` and `docs/architecture.mmd`.
 
 ---
@@ -284,7 +244,7 @@ Prefer versioned routes (`/api/v1/...`) for client integrations to enable safe e
   - Environment: `docs/postman/environment.json`
   - Import both in Postman, then set `GATEWAY_URL` to `http://localhost:8082`.
 
-For detailed documentation resources and regeneration steps, see [docs/README.md](docs/README.md).
+For detailed documentation resources and regeneration steps, see [docs/DOCS_OVERVIEW.md](docs/DOCS_OVERVIEW.md).
 
 ---
 
