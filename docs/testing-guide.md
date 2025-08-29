@@ -18,6 +18,7 @@ Tip for logs: any follow/stream hangs by design. Press Ctrl-C to exit (e.g., `ma
 ## Phase 1: Initial Setup & Basic Health
 
 ### 1.1 Prerequisites
+_Verify you have the required tooling installed locally._
 ```bash
 docker --version
 docker compose version
@@ -28,18 +29,21 @@ php --version     # optional local use
 ```
 
 ### 1.2 Clone and start
+_Get the code locally and move into the project root._
 ```bash
 git clone https://github.com/slimenmohamed/microservices-architecture.git
 cd microservices-architecture
 ```
 
 ### 1.3 Gateway config templating (recommended; aligns with CI)
+_Render Nginx gateway config from environment variables so your local run matches CI defaults._
 ```bash
 GW_RATE_LIMIT=100r/s GW_BURST=200 make gw-build-conf
 # Renders: infra/nginx/conf.d/default.conf
 ```
 
 ### 1.4 Bring up and check
+_Start the full stack, then confirm the gateway is healthy and all containers are up._
 ```bash
 make up
 make ps
@@ -52,6 +56,7 @@ docker ps  # gateway, user-service, notification-service, notification-worker, u
 ## Phase 2: Service-Level Testing
 
 ### 2.1 API Gateway
+_Validate gateway liveness, CORS behavior, and sample rate limiting responses (e.g., 200 vs 429)._ 
 ```bash
 curl -i http://localhost:8082/health
 # CORS probe
@@ -61,6 +66,7 @@ for i in {1..150}; do curl -s -o /dev/null -w "%{http_code}\n" http://localhost:
 ```
 
 ### 2.2 User Service (Direct & via Gateway)
+_Use direct ports for debugging readiness; prefer gateway routes for real client behavior. Replace `{id}` placeholders with actual IDs returned from create._
 ```bash
 # Direct (debugging)
 curl http://localhost:8080/ready
@@ -88,6 +94,7 @@ curl -X DELETE http://localhost:8082/api/users/{id}
 ```
 
 ### 2.3 Notification Service (Direct & via Gateway)
+_List, create, and filter notifications. Check Swagger to confirm exposed write endpoints._
 ```bash
 # Direct (debugging)
 curl http://localhost:8081/ready
@@ -107,6 +114,7 @@ curl "http://localhost:8082/api/notifications?userId=test-user"
 ```
 
 ### 2.4 Swagger/OpenAPI via Gateway
+_Swagger UIs are proxied by the gateway; use these to discover and try endpoints._
 ```bash
 # Users docs
 curl -I http://localhost:8082/api/users/docs
@@ -119,12 +127,14 @@ curl -I http://localhost:8082/api/notifications/docs
 ## Phase 3: Integration Tests
 
 ### 3.1 Smoke Tests
+_Fast checks that gateway/docs are up and basic listing/rate-limiting works._
 ```bash
 make smoke            # or: bash scripts/smoke.sh
 GATEWAY_URL=http://localhost:8082 make smoke
 ```
 
 ### 3.2 E2E Tests
+_Creates users, triggers a notification via user-service, and verifies it exists via notification-service._
 ```bash
 make e2e              # or: bash scripts/e2e.sh
 GATEWAY_URL=http://localhost:8082 make e2e
@@ -132,6 +142,7 @@ GATEWAY_URL=http://localhost:8082 make e2e
 ```
 
 ### 3.3 Async Message Flow (manual)
+_Manually exercise the event flow and confirm the worker consumes and writes to the notifications store._
 ```bash
 USER_RESPONSE=$(curl -s -X POST http://localhost:8082/api/users \
   -H "Content-Type: application/json" \
@@ -148,6 +159,7 @@ curl "http://localhost:8082/api/notifications?userId=$USER_ID" | jq .
 ## Phase 4: Databases
 
 ### 4.1 User DB (migrations and queries)
+_Run schema migrations and inspect data directly in MySQL to validate persistence._
 ```bash
 make status
 make migrate
@@ -164,6 +176,7 @@ docker compose -f infra/docker-compose.yml exec user-db \
 ```
 
 ### 4.2 Notification DB
+_Inspect the notification store to confirm messages are persisted as expected._
 ```bash
 docker compose -f infra/docker-compose.yml exec notif-db \
   mysql -unode -pnode -e "SHOW TABLES;" notifdb
@@ -176,6 +189,7 @@ docker compose -f infra/docker-compose.yml exec notif-db \
 
 ## Phase 5: RabbitMQ
 
+- _Use the UI for quick visibility; the CLI for scripted checks._
 - Management UI: http://localhost:15672 (guest/guest)
 - CLI checks
 ```bash
@@ -193,6 +207,7 @@ watch -n 1 'docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl
 ## Phase 6: Observability
 
 ### 6.1 Correlation ID tracing
+_Attach a correlation ID to requests and follow it across gateway and services to debug multi-hop flows._
 ```bash
 CID=$(uuidgen)
 # Try X-Correlation-Id
@@ -206,6 +221,7 @@ docker compose -f infra/docker-compose.yml logs user-service | grep "$CID"
 ```
 
 ### 6.2 Logs
+_Tail logs for live activity; print last N lines for quick inspections; grep for errors when diagnosing failures._
 ```bash
 make logs          # follow all; Ctrl-C to exit
 make logs-gw       # gateway only; Ctrl-C to exit
@@ -225,12 +241,14 @@ docker compose -f infra/docker-compose.yml logs | grep -i error
 ## Phase 7: Performance & Load
 
 ### 7.1 Rate limiting sampling
+_Expect a mix of 200 and 429 codes depending on your configured limits and concurrency._
 ```bash
 # Requires GNU parallel for high concurrency
 seq 200 | parallel -j 50 "curl -s -o /dev/null -w '%{http_code}' http://localhost:8082/api/users" | sort | uniq -c
 ```
 
 ### 7.2 Change limits and retest
+_Rebuild and reload gateway config to apply new rate limits, then sample again._
 ```bash
 export GW_RATE_LIMIT=20r/s
 export GW_BURST=40
@@ -240,6 +258,7 @@ for i in {1..50}; do curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8
 ```
 
 ### 7.3 Scaling (important limitation)
+_Docker cannot scale services with fixed `container_name`; remove or override to test replicas._
 Current `infra/docker-compose.yml` uses fixed `container_name` for `user-service` and `notification-service`. Docker cannot scale such services. To test scaling, remove those `container_name` entries (or use a compose override without them), then:
 ```bash
 docker compose -f infra/docker-compose.yml up -d --scale user-service=3
@@ -402,41 +421,3 @@ Optional: watch worker logs during scenario (Ctrl-C to exit)
 ```bash
 docker compose -f infra/docker-compose.yml logs -f notification-worker
 ```
-
-## Additional Notes and Expectations
-
-- __Log exit cheatsheet__
-  - `make logs*` or `docker compose logs -f` will follow logs. Press Ctrl-C to exit without stopping containers.
-  - To print recent lines without following: add `--tail=200` and omit `-f`.
-- __HTTP status expectations__
-  - Successful GET/POST: 200/201
-  - Delete: 204 No Content (or 200, depending on endpoint)
-  - Not found: 404
-  - Validation error: 400
-  - Rate limited: 429 (when limits are low and you flood the gateway)
-- __Gateway vs direct service__
-  - Prefer gateway URLs for all client testing.
-  - Use direct service ports (8080/8081) only for debugging readiness/health.
-- __OpenAPI & Swagger UI__
-  - Swagger UIs are always via gateway: `/api/users/docs`, `/api/notifications/docs`.
-  - Export JSON specs anytime with `make export-openapi`.
-- __CI (GitHub Actions) artifacts__
-  - OpenAPI bundle: artifact `openapi-specs` contains `docs/*.openapi.json` produced during CI run.
-  - Postman run report: artifact `postman-newman-report` contains `newman-report.json`.
-- __RabbitMQ visibility__
-  - UI at http://localhost:15672 (guest/guest).
-  - CLI: `docker compose -f infra/docker-compose.yml exec rabbitmq rabbitmqctl list_queues`.
-- __Correlation ID__
-  - Send `X-Correlation-Id: <uuid>` header to gateway; search the value in logs to trace a request end-to-end.
-
----
-
-## Troubleshooting Quick Reference
-
-- Ports busy: free 8080/8081/8082/3307/3308/5672/15672 or adjust mappings in `infra/docker-compose.yml`.
-- Gateway 502: `make restart-gw`, check `/health`, `make logs-gw`.
-- Unhealthy services: `make logs`, check DB readiness and env.
-- MySQL auth/availability: examine `infra/docker-compose.yml` and service logs.
-- OpenAPI stale: `make export-openapi`.
-- Scaling fails: due to `container_name`. Remove from services (or use an override) to enable scaling.
-- Log tails: press Ctrl-C to exit.

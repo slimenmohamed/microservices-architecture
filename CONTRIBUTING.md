@@ -6,6 +6,27 @@ This guide is your **developer handbook**: setup, workflows, commands, coding st
 
 ---
 
+## 📑 Table of Contents
+
+- [🧰 Tech Stack Overview](#tech-stack-overview)
+- [📚 API Docs & Postman](#api-docs--postman)
+- [🩺 Health & Readiness](#health--readiness)
+- [✅ Testing Overview](#testing-overview)
+- [🔎 Observability & Limits](#observability--limits)
+- [🧭 Dev vs Prod Modes](#dev-vs-prod-modes)
+- [📋 Prerequisites](#prerequisites)
+- [⚙️ Environment Setup](#environment-setup)
+- [💻 Daily Development Workflow](#daily-development-workflow)
+- [📖 Command Reference](#command-reference)
+- [📏 Coding Standards](#coding-standards)
+- [📝 Commit Conventions](#commit-conventions)
+- [🔄 PR Workflow](#pr-workflow)
+- [✅ Code Review Checklist](#️code-review-checklist)
+- [🛠️ Troubleshooting](#troubleshooting)
+- [🆘 Getting Help](#getting-help)
+
+---
+
 ## 🧰 Tech Stack Overview
 
 | Area            | Tools |
@@ -85,7 +106,7 @@ Example log line (gateway):
 
 ---
 
-## 🧭 Dev vs Prod modes
+## 🧭 Dev vs Prod Modes
 
 - The User Service container defaults to `APP_ENV=prod` (`infra/docker-compose.yml`).
 - For local development, you can switch to dev mode by setting `APP_ENV=dev` and then:
@@ -94,21 +115,7 @@ Example log line (gateway):
   ```
 - Note: using prod mode locally is fine for quick demos; dev mode enables more verbose debugging.
 
-## 📋 Contents
-- [Prerequisites](#prerequisites)
-- [Environment Setup](#environment-setup)
-- [Adding a New Microservice](docs/ADDING_A_SERVICE.md)
-- [Daily Development Workflow](#daily-development-workflow)
-- [Command Reference](#command-reference)
- - [Cleanup](#cleanup)
-- [Coding Standards](#coding-standards)
-- [Commit Conventions](#commit-conventions)
-- [PR Workflow](#pr-workflow)
-- [Code Review Checklist](#code-review-checklist)
-- [Troubleshooting](#troubleshooting)
-- [Getting Help](#getting-help)
-
----
+ 
 
 ## 📋 Prerequisites
 - **Docker 20.10+** with Docker Compose v2
