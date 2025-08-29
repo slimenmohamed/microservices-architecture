@@ -121,6 +121,28 @@ jobs:
       - name: E2E test
         run: make e2e
 
+      - name: Set up Node.js (for Postman CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install newman (Postman CLI)
+        run: npm install -g newman
+
+      - name: Postman CLI (newman) - run API collection
+        run: |
+          newman run docs/postman/collection.json \
+            -e docs/postman/environment.json \
+            --env-var GATEWAY_URL=http://localhost:8082 \
+            --reporters cli,json \
+            --reporter-json-export newman-report.json
+
+      - name: Upload Postman (newman) report
+        uses: actions/upload-artifact@v4
+        with:
+          name: postman-newman-report
+          path: newman-report.json
+
       - name: Export OpenAPI specs
         run: bash scripts/export-openapi.sh
 
